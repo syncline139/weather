@@ -24,7 +24,7 @@ public class Users {
     private String login;
 
     @NotEmpty(message = "Поле не должно быть пустым")
-    @Size(min = 6,max = 30,message = "Пароль должен быть в пределах от 6 до 40 символов")
+    @Size(min = 6,max = 60,message = "Пароль должен быть в пределах от 6 до 60 символов")
     @Column(name = "password")
     private String password;
     @Transient

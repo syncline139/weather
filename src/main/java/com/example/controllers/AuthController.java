@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/auth")
-public class AuthControllers {
+public class AuthController {
 
     private final AuthDao authDao;
     private final AuthServices authServices;
 
-    public AuthControllers(AuthDao authDao, AuthServices authServices) {
+    public AuthController(AuthDao authDao, AuthServices authServices) {
         this.authDao = authDao;
         this.authServices = authServices;
     }
