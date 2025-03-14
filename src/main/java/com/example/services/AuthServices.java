@@ -12,7 +12,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 /**
  * В данном классе содержиться бизнес-логика относящиеся к аунтентификации
@@ -71,7 +74,8 @@ public class AuthServices {
         Cookie cookie = new Cookie("SESSIONID", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(86400);
+        cookie.setMaxAge(86400); // 24 часа
+
         response.addCookie(cookie);
 
     }
@@ -79,10 +83,33 @@ public class AuthServices {
     /**
      * Каждый час выполняется проверка на просроченные UUID
      */
-    @Scheduled(fixedRate = 3600 * 1000)
+    @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void sessionClear() {
         authDao.findAllExpiresat();
     }
+
+    /**
+     * Метод регулярно (каждые 22 часа) проверяет все активные сессии.
+     * Если до истечения сессии осталось менее 3 часов, то считается
+     * что пользователь был активен недавно и сессия продлевается на один день от текущего момента
+     */
+    @Scheduled(fixedRate = 4752000 * 1000) // каждые 22 часа
+    public void extendSessions() {
+
+        List<Sessions> sessionsList = authDao.findAllSession();
+        LocalDateTime now = LocalDateTime.now();
+        long fifteenMinutesMillis = 180 * 60 * 1000L; // 3 часа
+
+        for (Sessions session : sessionsList) {
+            long remainingMillis = Duration.between(now, session.getExpiresAt()).toMillis();
+            if (remainingMillis < fifteenMinutesMillis) {
+                // Продлеваем сессию на 1 день от текущего момента
+                session.setExpiresAt(now.plusDays(1));
+                authDao.saveSession(session);
+            }
+        }
+    }
+
 }
 
 

@@ -76,7 +76,13 @@ public class AuthDao {
                 .uniqueResult();
     }
 
-
+    /**
+     * При успехе Hibernate извлекается объект Sessions, используя uuid в качестве идентификатора
+     * затем валидируем сессию если заданая сесиия больше текущего значит все гуд
+     *
+     * @param id в 1 очередь метод получает строку id и пытается преобразовать её в объект UUID
+     * @return true если сессия валиданая и false если сессия не найдена или срок истечения уже прошел
+     */
     public boolean findByUUID(String id) {
         UUID uuid;
         try {
@@ -111,6 +117,12 @@ public class AuthDao {
                 currentSession.remove(s);
             }
         }
+    }
+
+    public List<Sessions> findAllSession() {
+        Session currentSession = sessionFactory.getCurrentSession();
+        return currentSession.createQuery("from Sessions", Sessions.class)
+                .getResultList();
     }
 
 }

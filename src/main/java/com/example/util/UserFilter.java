@@ -28,6 +28,7 @@ public class UserFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        // юзер без авторизации сможет зайти только на эти сайты
         String path = request.getRequestURI();
         if (path.equals("/auth/sign-in") || path.equals("/auth/sign-up")) {
             filterChain.doFilter(request, response);
