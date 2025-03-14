@@ -4,11 +4,13 @@ import com.example.models.Sessions;
 import com.example.models.Users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -93,6 +95,22 @@ public class AuthDao {
             }
         }
         return false;
+    }
+
+    /**
+     * Запрос ищет просроченные UUID и удаляет
+     */
+    public void findAllExpiresat() {
+        Session currentSession = sessionFactory.getCurrentSession();
+
+        List<Sessions> expiresAt = currentSession.createQuery("from Sessions", Sessions.class)
+                .getResultList();
+        // проверяем каждую сесиию и если время у какой то меньше чем нынешнее значит оно прострочено и удаляем его
+        for (Sessions s : expiresAt) {
+            if (s.getExpiresAt().isBefore(LocalDateTime.now())) {
+                currentSession.remove(s);
+            }
+        }
     }
 
 }

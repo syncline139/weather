@@ -8,6 +8,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
  * В данном классе содержиться бизнес-логика относящиеся к аунтентификации
  */
 @Service
+@EnableScheduling
 public class AuthServices {
 
     private final AuthDao authDao;
@@ -73,7 +76,13 @@ public class AuthServices {
 
     }
 
-
+    /**
+     * Каждый час выполняется проверка на просроченные UUID
+     */
+    @Scheduled(fixedRate = 3600 * 1000)
+    public void sessionClear() {
+        authDao.findAllExpiresat();
+    }
 }
 
 
