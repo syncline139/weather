@@ -1,5 +1,6 @@
 package com.example.config;
 
+import com.example.util.UserFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -109,7 +110,6 @@ public class SpringConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/view/static/images/");
 
     }
-
 
 
 }

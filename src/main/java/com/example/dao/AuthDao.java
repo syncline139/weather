@@ -75,4 +75,24 @@ public class AuthDao {
     }
 
 
+    public boolean findByUUID(String id) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        Session currentSession = sessionFactory.getCurrentSession();
+        Sessions sessions = currentSession.get(Sessions.class, uuid);
+
+        if (sessions != null) {
+            LocalDateTime expiresAt = sessions.getExpiresAt();
+            if (expiresAt != null && expiresAt.isAfter(LocalDateTime.now())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

@@ -58,7 +58,7 @@ public class AuthServices {
 
         Sessions sessions = new Sessions();
         sessions.setUser(user);
-        sessions.setExpiresAt(LocalDateTime.now().plusMinutes(2));
+        sessions.setExpiresAt(LocalDateTime.now().plusDays(1));
 
         authDao.saveSession(sessions);
 
@@ -68,7 +68,7 @@ public class AuthServices {
         Cookie cookie = new Cookie("SESSIONID", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(2 * 60);
+        cookie.setMaxAge(86400);
         response.addCookie(cookie);
 
     }
