@@ -1,9 +1,12 @@
 package com.example.controllers;
 
 import com.example.dao.AuthDao;
+import com.example.models.Sessions;
 import com.example.models.Users;
 import com.example.services.AuthServices;
 import com.example.util.PasswordUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * В данным классе содержаться контроллеры относящиеся к аунтентификации
@@ -75,7 +80,7 @@ public class AuthController {
     /**
      * Котнроллер отвечает за обработку валидации и куков он ищет юзера по логину
      * проходит все проверки и если вход успешен то пользотвалю отправляются куки
-     *  которые мы обрабатываем на стороне бизнес-логики
+     * которые мы обрабатываем на стороне бизнес-логики
      *
      * @param response опралвяем куки пользотвалю
      * @return редирактим юзера на основню страницу
@@ -103,5 +108,12 @@ public class AuthController {
 
         return "redirect:/";
     }
+
+    @DeleteMapping("/logout")
+    public String signOut(HttpServletRequest request, HttpServletResponse response) {
+        authServices.exit(request, response);
+        return "redirect:/auth/sign-in";
+    }
+
 
 }

@@ -125,4 +125,19 @@ public class AuthDao {
                 .getResultList();
     }
 
+
+    public void deleteSession(Sessions session) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        if (session != null) {
+            currentSession.remove(session);
+        }
+
+    }
+
+    public Sessions findSessionByUUID(UUID uuid) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        return currentSession.createQuery("select s from Sessions s where id = :uuid", Sessions.class)
+                .setParameter("uuid", uuid).getSingleResult();
+    }
+
 }

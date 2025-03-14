@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * В данном классе содержиться бизнес-логика относящиеся к аунтентификации
@@ -81,6 +82,40 @@ public class AuthServices {
     }
 
     /**
+     * Ищем сессию в Бд и удаляем ее и так же анулируем сессиию у юзера посылая ему новые куки
+     *
+     * @param request принимаем куки активного пользователя
+     * @param response посылаем новые куки пользотваля
+     */
+    public void exit(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("SESSIONID".equals(c.getName())) { // SESSIONID -> название наших куков
+                    String sessionIdStr = c.getValue();
+                    if (authDao.findByUUID(sessionIdStr)) {
+                        UUID uuid;
+                        try {
+                            uuid = UUID.fromString(sessionIdStr);
+                        } catch (IllegalArgumentException e) {
+                            continue;
+                        }
+                        // удаляем сессию из Бд и удаляем куки у пользователя
+                        Sessions session = authDao.findSessionByUUID(uuid);
+                        if (session != null) {
+                            authDao.deleteSession(session);
+                            Cookie cookie = new Cookie("SESSIONID", null);
+                            cookie.setPath("/");
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Каждый час выполняется проверка на просроченные UUID
      */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
@@ -109,6 +144,7 @@ public class AuthServices {
             }
         }
     }
+
 
 }
 
