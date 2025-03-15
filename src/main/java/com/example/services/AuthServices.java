@@ -7,7 +7,9 @@ import com.example.util.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ImportSelector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -76,15 +78,15 @@ public class AuthServices {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(86400); // 24 часа
-
         response.addCookie(cookie);
+
 
     }
 
     /**
      * Ищем сессию в Бд и удаляем ее и так же анулируем сессиию у юзера посылая ему новые куки
      *
-     * @param request принимаем куки активного пользователя
+     * @param request  принимаем куки активного пользователя
      * @param response посылаем новые куки пользотваля
      */
     public void exit(HttpServletRequest request, HttpServletResponse response) {
@@ -114,6 +116,7 @@ public class AuthServices {
             }
         }
     }
+
 
     /**
      * Каждый час выполняется проверка на просроченные UUID

@@ -80,15 +80,16 @@ public class AuthController {
     /**
      * Котнроллер отвечает за обработку валидации и куков он ищет юзера по логину
      * проходит все проверки и если вход успешен то пользотвалю отправляются куки
-     * которые мы обрабатываем на стороне бизнес-логики
+     * которые мы обрабатываем в сервисе
      *
      * @param response опралвяем куки пользотвалю
      * @return редирактим юзера на основню страницу
      */
     @PostMapping("/sign-in")
-    public String authorization(@ModelAttribute("login") Users user,
+    public String authentication(@ModelAttribute("login") Users user,
                                 BindingResult bindingResult,
-                                HttpServletResponse response) {
+                                HttpServletResponse response,
+                                HttpServletRequest request) {
 
         if (bindingResult.hasErrors()) {
             return "auth/sign-in";
@@ -105,6 +106,7 @@ public class AuthController {
         }
 
         authServices.createSession(byLogin, response);
+        request.getSession().setAttribute("login", user.getLogin()); // отправляем в сесиию логин пользователя
 
         return "redirect:/";
     }

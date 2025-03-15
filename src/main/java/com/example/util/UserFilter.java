@@ -5,6 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +35,8 @@ public class UserFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
+            Cookie[] cookies = request.getCookies();
 
-        Cookie[] cookies = request.getCookies();
         boolean sessionValid = false;
 
         if (cookies != null) {
@@ -55,5 +56,6 @@ public class UserFilter implements Filter {
         } else {
             response.sendRedirect(request.getContextPath() + "/auth/sign-in");
         }
+
     }
 }
