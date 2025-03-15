@@ -21,7 +21,18 @@ public class UserFilter implements Filter {
         this.authDao = authDao;
     }
 
-
+    /**
+     * Фильтр для проверки аутентификации юзера
+     * Данный фильтр выполняет следующие действия:
+     *  -> Проверяет наличие cookie с именем "SESSIONID" и валидирует сессию
+     *  -> Не дает юзеру зайти на страницу регестрации или авторизации если тот аутентифицирован
+     *  -> Не дает юзера зайти на на страници пока тот не аутентифицирован
+     * @param servletRequest  запрос
+     * @param servletResponse ответ
+     * @param filterChain цепочка фильтров через которую передается запрос
+     * @throws IOException в случае ошибки ввода/вывода
+     * @throws ServletException в случае ошибки сервлета
+     */
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
@@ -29,33 +40,34 @@ public class UserFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        // юзер без авторизации сможет зайти только на эти сайты
-        String path = request.getRequestURI();
-        if (path.equals("/auth/sign-in") || path.equals("/auth/sign-up")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-            Cookie[] cookies = request.getCookies();
 
-        boolean sessionValid = false;
+        String path = request.getRequestURI().substring(request.getContextPath().length());
 
+        Cookie[] cookies = request.getCookies();
+        boolean authenticatedValid = false;
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if ("SESSIONID".equals(c.getName())) {
                     String sessionId = c.getValue();
                     if (authDao.findByUUID(sessionId)) {
-                        sessionValid = true;
+                        authenticatedValid = true;
                         break;
                     }
                 }
             }
         }
 
-        if (sessionValid) {
-            filterChain.doFilter(request, response);
-        } else {
-            response.sendRedirect(request.getContextPath() + "/auth/sign-in");
+        if (authenticatedValid && (path.equals("/auth/sign-in") || path.equals("/auth/sign-up"))) {
+            response.sendRedirect(request.getContextPath() + "/weather");
+            return;
         }
 
+        if (!authenticatedValid && !(path.equals("/auth/sign-in") || path.equals("/auth/sign-up"))) {
+            response.sendRedirect(request.getContextPath() + "/auth/sign-in");
+            return;
+        }
+
+        filterChain.doFilter(request, response);
     }
+
 }
