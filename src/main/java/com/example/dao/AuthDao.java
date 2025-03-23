@@ -9,6 +9,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -19,12 +20,14 @@ import java.util.UUID;
 /**
  * В данном классе содержатся hibernate запросы к БД относящиеся к аунтентификации
  */
-@Component
+@Repository
 @Transactional
 @RequiredArgsConstructor
 public class AuthDao {
 
     private final SessionFactory sessionFactory;
+
+    
 
     /**
      * Сохраняет пользотвалея в БД
@@ -35,6 +38,7 @@ public class AuthDao {
         Session currentSession = sessionFactory.getCurrentSession();
         if (user != null) {
             currentSession.persist(user);
+            currentSession.flush();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.config;
 
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -108,6 +109,18 @@ public class SpringConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/view/static/images/");
 
+    }
+    @Bean
+    public Flyway flyway() {
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource())
+                .locations("classpath:db/migration")
+                .baselineOnMigrate(true)
+                .load();
+
+        flyway.migrate();
+
+        return flyway;
     }
 
 
