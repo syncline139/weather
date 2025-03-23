@@ -17,6 +17,7 @@ public class FlywayConfig {
                 .load();
         flyway.migrate();
         return flyway;
+
     }
 
 }
