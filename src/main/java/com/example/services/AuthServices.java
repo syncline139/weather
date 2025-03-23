@@ -39,18 +39,23 @@ public class AuthServices {
      * @param user передаем человека которого мы сохраним если пройдем провреки
      */
     public void save(Users user) {
-
         String login = user.getLogin();
 
-        if (user.getPassword() != null &&
-            user.getPassword().equals(user.getConfirmPassword()) &&
-            authDao.uniqueLogin(login)) {
-
-            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
-            user.setPassword(hashedPassword);
-
-            authDao.saveUser(user);
+        if (login == null || login.isEmpty()) {
+            throw new IllegalArgumentException("Логин не может быть пустым или null");
         }
+
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            throw new IllegalArgumentException("Пароли не совпадают");
+        }
+
+        if (!authDao.uniqueLogin(login)) {
+            throw new IllegalStateException("Пользователь с таким логином уже существует");
+        }
+
+        String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+        authDao.saveUser(user);
     }
 
     /**
