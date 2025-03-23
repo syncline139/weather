@@ -27,7 +27,6 @@ public class AuthDao {
 
     private final SessionFactory sessionFactory;
 
-    
 
     /**
      * Сохраняет пользотвалея в БД
@@ -56,6 +55,9 @@ public class AuthDao {
      * @return возвращаем true если логин не занят
      */
     public boolean uniqueLogin(String login) {
+        if (login == null || login.isEmpty()) {
+            return false;
+        }
         Session currentSession = sessionFactory.getCurrentSession();
         Long count = (Long) currentSession
                 .createQuery("select count(u) from Users u where u.login = :login")

@@ -57,10 +57,8 @@ public class TestConfig{
         Properties properties = new Properties();
         properties.put("hibernate.dialect", env.getRequiredProperty("hibernate.dialect"));
         properties.put("hibernate.show_sql", env.getRequiredProperty("hibernate.show_sql"));
-        properties.put("hibernate.connection.autocommit", "true");
-        properties.put("hibernate.connection.username", "sa");
-        properties.put("hibernate.connection.password", "");
-        properties.put("hibernate.use_sql_comments", "false");
+        properties.put("hibernate.connection.username", env.getRequiredProperty("database.username"));
+        properties.put("hibernate.connection.password", env.getRequiredProperty("database.password"));
         return properties;
     }
 
@@ -70,7 +68,6 @@ public class TestConfig{
         sessionFactory.setDataSource(dataSource());
         sessionFactory.setPackagesToScan("com.example.models");
         sessionFactory.setHibernateProperties(hibernateProperties());
-        System.out.println("Создание SessionFactory...");
         return sessionFactory;
     }
 
@@ -87,9 +84,7 @@ public class TestConfig{
                 .dataSource(dataSource())
                 .locations("classpath:db/test_migration")
                 .load();
-        System.out.println("Применение миграций Flyway для тестовой базы данных...");
         flyway.migrate();
-        System.out.println("Миграции Flyway применены.");
         return flyway;
     }
 
