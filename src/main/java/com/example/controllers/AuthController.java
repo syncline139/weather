@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,15 +23,12 @@ import java.util.UUID;
  */
 @Controller
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthDao authDao;
     private final AuthServices authServices;
 
-    public AuthController(AuthDao authDao, AuthServices authServices) {
-        this.authDao = authDao;
-        this.authServices = authServices;
-    }
 
     /**
      * Возвращает странцу регестрации

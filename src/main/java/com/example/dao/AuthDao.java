@@ -2,6 +2,8 @@ package com.example.dao;
 
 import com.example.models.Sessions;
 import com.example.models.Users;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -19,14 +21,10 @@ import java.util.UUID;
  */
 @Component
 @Transactional
+@RequiredArgsConstructor
 public class AuthDao {
 
     private final SessionFactory sessionFactory;
-
-    @Autowired
-    public AuthDao(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     /**
      * Сохраняет пользотвалея в БД

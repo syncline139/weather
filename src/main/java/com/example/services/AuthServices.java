@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,14 +26,11 @@ import java.util.UUID;
  */
 @Service
 @EnableScheduling
+@RequiredArgsConstructor
 public class AuthServices {
 
     private final AuthDao authDao;
 
-    @Autowired
-    public AuthServices(AuthDao authDao) {
-        this.authDao = authDao;
-    }
 
     /**
      * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль

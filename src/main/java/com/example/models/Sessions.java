@@ -1,6 +1,10 @@
 package com.example.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -8,6 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "sessions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Sessions {
 
     @Id
@@ -23,37 +31,4 @@ public class Sessions {
     private Users user;
 
 
-    public Sessions() {
-    }
-
-    public Sessions(UUID id, Users user, LocalDateTime expiresAt) {
-        this.id = id;
-        this.user = user;
-        this.expiresAt = expiresAt;
-    }
-
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
-    }
 }

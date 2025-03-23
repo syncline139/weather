@@ -6,20 +6,19 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Component("userFilter")
+@RequiredArgsConstructor
 public class UserFilter implements Filter {
 
     private final AuthDao authDao;
 
-    @Autowired
-    public UserFilter(AuthDao authDao) {
-        this.authDao = authDao;
-    }
+
 
     /**
      * Фильтр для проверки аутентификации юзера

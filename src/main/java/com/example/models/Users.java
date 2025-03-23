@@ -4,11 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Users {
 
 
@@ -35,63 +43,5 @@ public class Users {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<Sessions> sessions;
-
-
-    public Users() {
-    }
-
-    public Users(String login, String password) {
-        this.login = login;
-        this.password = password;
-    }
-
-    public List<Locations> getLocations() {
-        return locations;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-
-    public void setLocations(List<Locations> locations) {
-        this.locations = locations;
-    }
-
-    public List<Sessions> getSessions() {
-        return sessions;
-    }
-
-    public void setSessions(List<Sessions> sessions) {
-        this.sessions = sessions;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 
 }
