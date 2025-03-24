@@ -39,6 +39,11 @@ public class AuthServices {
      * @param user передаем человека которого мы сохраним если пройдем провреки
      */
     public void save(Users user) {
+
+        if (user == null) {
+            throw new IllegalArgumentException("Пользователь не может быть null");
+        }
+
         String login = user.getLogin();
 
         if (login == null || login.isEmpty()) {
@@ -68,6 +73,10 @@ public class AuthServices {
      */
 
     public void createSession(Users user, HttpServletResponse response) {
+
+        if (user == null) {
+            throw new IllegalArgumentException("user не может быть null ( AuthServices/createSession");
+        }
 
         Sessions sessions = new Sessions();
         sessions.setUser(user);
@@ -114,10 +123,14 @@ public class AuthServices {
                             cookie.setPath("/");
                             cookie.setMaxAge(0);
                             response.addCookie(cookie);
+                        } else {
+                            throw new IllegalArgumentException("Сессия не должна быть null AuthServices/exit");
                         }
                     }
                 }
             }
+        } else {
+            throw new IllegalArgumentException("куки не должны быть null AuthServices/exit");
         }
     }
 

@@ -35,17 +35,16 @@ public class AuthDao {
      */
     public void saveUser(Users user) {
         Session currentSession = sessionFactory.getCurrentSession();
-        if (user != null) {
-            currentSession.persist(user);
-            currentSession.flush();
-        }
+
+        currentSession.persist(user);
+        currentSession.flush();
+
     }
 
     public void saveSession(Sessions session) {
         Session currentSession = sessionFactory.getCurrentSession();
-        if (session != null) {
             currentSession.persist(session);
-        }
+
     }
 
     /**
@@ -56,7 +55,7 @@ public class AuthDao {
      */
     public boolean uniqueLogin(String login) {
         if (login == null || login.isEmpty()) {
-            return false;
+            throw new IllegalArgumentException("логин не может быть null или пустым AuthDao/uniqueLogin");
         }
         Session currentSession = sessionFactory.getCurrentSession();
         Long count = (Long) currentSession
@@ -82,7 +81,7 @@ public class AuthDao {
 
     /**
      * При успехе Hibernate извлекается объект Sessions, используя uuid в качестве идентификатора
-     * затем валидируем сессию если заданая сесиия больше текущего значит все гуд
+     * затем валидируем сессию если заданная сесиия больше текущего значит все гуд
      *
      * @param id в 1 очередь метод получает строку id и пытается преобразовать её в объект UUID
      * @return true если сессия валиданая и false если сессия не найдена или срок истечения уже прошел
@@ -123,6 +122,9 @@ public class AuthDao {
         }
     }
 
+    /**
+     * @return возвращает список всех найденных сессий
+     */
     public List<Sessions> findAllSession() {
         Session currentSession = sessionFactory.getCurrentSession();
         return currentSession.createQuery("from Sessions", Sessions.class)
@@ -132,9 +134,8 @@ public class AuthDao {
 
     public void deleteSession(Sessions session) {
         Session currentSession = sessionFactory.getCurrentSession();
-        if (session != null) {
             currentSession.remove(session);
-        }
+
 
     }
 
