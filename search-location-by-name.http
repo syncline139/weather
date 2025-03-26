@@ -1,0 +1,3 @@
+### Get users
+GET https://api.openweathermap.org/data/2.5/weather?q=Moscow&appid=c56f0056480160b930ffb41b21d6b522
+Accept: application/json

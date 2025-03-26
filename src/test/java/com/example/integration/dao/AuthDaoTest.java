@@ -4,18 +4,15 @@ import com.example.dao.AuthDao;
 import com.example.integration.annotation.IT;
 import com.example.models.Sessions;
 import com.example.models.Users;
-import org.h2.engine.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @IT
 @Transactional
 @Tag("daoTest")
-public class FinderDaoTest {
+public class AuthDaoTest {
 
     private AuthDao authDao;
     private SessionFactory sessionFactory;
 
     @Autowired
-    public FinderDaoTest(AuthDao authDao, SessionFactory sessionFactory) {
+    public AuthDaoTest(AuthDao authDao, SessionFactory sessionFactory) {
         this.authDao = authDao;
         this.sessionFactory = sessionFactory;
     }
