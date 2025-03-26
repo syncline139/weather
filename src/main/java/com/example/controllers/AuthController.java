@@ -80,6 +80,8 @@ public class AuthController {
      *
      * @param response опралвяем куки пользотвалю
      * @return редирактим юзера на основню страницу
+     *      TODO печинить аунтетификацию
+     *      TODO при аунтентификации перебрасывает на страницу ошибки вместо того что бы выкинуть валидацию
      */
     @PostMapping("/sign-in")
     public String authentication(@ModelAttribute("login") Users user,

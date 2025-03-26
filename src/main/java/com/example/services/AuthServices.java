@@ -126,7 +126,11 @@ public class AuthServices {
                         } else {
                             throw new IllegalArgumentException("Сессия не должна быть null AuthServices/exit");
                         }
+                    } else {
+                        throw new IllegalArgumentException("UUID не найдено в БД AuthServices/exit");
                     }
+                } else {
+                    throw new IllegalArgumentException("Невереное название сессии AuthServices/exit");
                 }
             }
         } else {

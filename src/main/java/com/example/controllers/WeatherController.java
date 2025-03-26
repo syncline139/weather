@@ -29,7 +29,6 @@ public class WeatherController {
             String login = (String) session.getAttribute("login");
             model.addAttribute("login", login);
         }
-
         return "pages/index";
     }
 

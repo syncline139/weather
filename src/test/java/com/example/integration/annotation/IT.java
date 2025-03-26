@@ -2,6 +2,7 @@ package com.example.integration.annotation;
 
 import com.example.integration.config.TestConfig;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -15,7 +16,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class})
 @ContextConfiguration(classes = TestConfig.class)
 @ActiveProfiles("test")
 public @interface IT {
