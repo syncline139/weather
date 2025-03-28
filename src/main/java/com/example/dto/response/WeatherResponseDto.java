@@ -1,6 +1,7 @@
 package com.example.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherResponseDto {
 
+    @NotBlank(message = "Введите город")
     private String name;      // Название города
     private Coord coord;      // Координаты
     private Sys sys;          // Страна
