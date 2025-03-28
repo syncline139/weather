@@ -33,6 +33,7 @@ public class AuthServices {
     private final AuthDao authDao;
 
 
+
     /**
      * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль
      *
@@ -40,27 +41,17 @@ public class AuthServices {
      */
     public void save(Users user) {
 
-        if (user == null) {
-            throw new IllegalArgumentException("Пользователь не может быть null");
-        }
-
         String login = user.getLogin();
 
-        if (login == null || login.isEmpty()) {
-            throw new IllegalArgumentException("Логин не может быть пустым или null");
-        }
+        if (user.getPassword() != null &&
+                user.getPassword().equals(user.getConfirmPassword()) &&
+                authDao.uniqueLogin(login)) {
 
-        if (!user.getPassword().equals(user.getConfirmPassword())) {
-            throw new IllegalArgumentException("Пароли не совпадают");
-        }
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
 
-        if (!authDao.uniqueLogin(login)) {
-            throw new IllegalStateException("Пользователь с таким логином уже существует");
+            authDao.saveUser(user);
         }
-
-        String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
-        user.setPassword(hashedPassword);
-        authDao.saveUser(user);
     }
 
     /**
@@ -129,8 +120,6 @@ public class AuthServices {
                     } else {
                         throw new IllegalArgumentException("UUID не найдено в БД AuthServices/exit");
                     }
-                } else {
-                    throw new IllegalArgumentException("Невереное название сессии AuthServices/exit");
                 }
             }
         } else {

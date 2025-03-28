@@ -43,29 +43,30 @@ public class AuthController {
     }
 
     /**
-     *  TODO сделать документацию
+     * Добавляет нового юзера прошедшего валдиацию в БД
+     *
+     * @param user          передается человек уже с данными из формы
+     * @param bindingResult ошбики валидации
+     * @return перекидываем пользователя на страницу входа в акканут после успешной регестрации
      */
-    @PatchMapping("/sign-up")
-    public String registration(@ModelAttribute("user") @Valid Users user, BindingResult bindingResult) {
-        try {
-            authServices.save(user);
-        } catch (IllegalArgumentException e) {
-            if (e.getMessage().contains("Пароли")) {
-                bindingResult.rejectValue("confirmPassword", "error.confirmPassword", e.getMessage());
-            } else {
-                bindingResult.rejectValue("login", "error.login", e.getMessage());
-            }
-        } catch (IllegalStateException e) {
-            bindingResult.rejectValue("login", "error.login", e.getMessage());
-        }
+    @PostMapping("/sign-up")
+    public String registration(@ModelAttribute("user") @Valid Users user,
+                               BindingResult bindingResult) {
 
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "Пароли не совпадают");
+        }
+        if (!authDao.uniqueLogin(user.getLogin())) {
+            bindingResult.rejectValue("login", "error.login", "Пользователь с таким логином уже существует");
+        }
         if (bindingResult.hasErrors()) {
             return "auth/sign-up";
         }
 
+        authServices.save(user);
+
         return "auth/sign-in";
     }
-
 
     @GetMapping("/sign-in")
     public String authorizationPage(Users user, Model model) {
@@ -106,7 +107,7 @@ public class AuthController {
         authServices.createSession(byLogin, response);
         request.getSession().setAttribute("login", user.getLogin()); // отправляем в сесиию логин пользователя
 
-        return "redirect:/";
+        return "redirect:/weather";
     }
 
     @DeleteMapping("/logout")
