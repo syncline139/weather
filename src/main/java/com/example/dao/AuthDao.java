@@ -35,10 +35,10 @@ public class AuthDao {
      */
     public void saveUser(Users user) {
         Session currentSession = sessionFactory.getCurrentSession();
-
-        currentSession.persist(user);
-        currentSession.flush();
-
+        if (user != null) {
+            currentSession.persist(user);
+            currentSession.flush();
+        }
     }
 
     public void saveSession(Sessions session) {
@@ -135,8 +135,6 @@ public class AuthDao {
     public void deleteSession(Sessions session) {
         Session currentSession = sessionFactory.getCurrentSession();
             currentSession.remove(session);
-
-
     }
 
     public Sessions findSessionByUUID(UUID uuid) {
