@@ -143,4 +143,14 @@ public class AuthDao {
                 .setParameter("uuid", uuid).getSingleResult();
     }
 
+
+    public String findLoginByUUID(UUID UUID) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        return currentSession.createQuery(
+                        "select s.user.login from Sessions s where s.id = :UUID", String.class)
+                .setParameter("UUID", UUID)
+                .uniqueResult();
+    }
+
+
 }

@@ -16,7 +16,7 @@
         </a>
         <div class="d-flex align-items-center">
             <span th:text="${login}" class="navbar-text me-3">Логин пользователя</span>
-            <form th:action="@{/logout}" th:method="POST">
+            <form th:action="@{/auth/logout}" th:method="DELETE">
                 <button type="submit" class="btn btn-outline-danger">Sign out</button>
             </form>
         </div>

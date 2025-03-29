@@ -6,16 +6,14 @@ import com.example.models.Users;
 import com.example.services.AuthServices;
 import com.example.services.WeatherService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.print.DocFlavor;
@@ -38,13 +36,14 @@ public class WeatherController {
             String login = (String) session.getAttribute("login");
             model.addAttribute("login", login);
         }
+
         return "pages/index";
     }
 
 
     @PostMapping("/search-results")
     public String search(@RequestParam("nameCity") String nameCity, Model model, HttpServletRequest request
-            ,RedirectAttributes redirectAttributes) {
+            , RedirectAttributes redirectAttributes) {
 
         if (nameCity == null || nameCity.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Город не может быть пустым");
@@ -63,8 +62,6 @@ public class WeatherController {
         model.addAttribute("sys", search.getSys());
 
         return "pages/search-results";
-
-
     }
 
 }
