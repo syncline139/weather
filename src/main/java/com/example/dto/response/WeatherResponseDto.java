@@ -14,7 +14,6 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherResponseDto {
 
-    @NotBlank(message = "Введите город")
     private String name;      // Название города
     private Coord coord;      // Координаты
     private Sys sys;          // Страна
