@@ -88,8 +88,5 @@ public class TestConfig{
         return flyway;
     }
 
-//    @Bean
-//    public ExchangeFunction exchangeFunction() {
-//        return Mockito.mock(ExchangeFunction.class);
-//    }
+
 }

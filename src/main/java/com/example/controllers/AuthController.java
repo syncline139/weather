@@ -113,6 +113,11 @@ public class AuthController {
         return "redirect:/weather";
     }
 
+    /**
+     * После нажатия на кнопку 'logout' пользователю отправляем куки с чистой сессией и удаляем из БД
+     *
+     * @return редиректим юзера на страницу входа в акканут
+     */
     @DeleteMapping("/logout")
     public String signOut(HttpServletRequest request, HttpServletResponse response) {
         authServices.exit(request, response);

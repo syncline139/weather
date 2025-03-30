@@ -7,18 +7,13 @@ import com.example.util.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ImportSelector;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -133,15 +128,15 @@ public class AuthServices {
      */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void sessionClear() {
-        authDao.findAllExpiresat();
+        authDao.removeAllExpiresatElseOverdueTime();
     }
 
     /**
-     * Метод регулярно (каждые 22 часа) проверяет все активные сессии.
+     * Метод регулярно (каждый час ) проверяет все активные сессии.
      * Если до истечения сессии осталось менее 3 часов, то считается
      * что пользователь был активен недавно и сессия продлевается на один день от текущего момента
      */
-    @Scheduled(fixedRate = 4752000 * 1000) // каждые 22 часа
+    @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void extendSessions() {
 
         List<Sessions> sessionsList = authDao.findAllSession();
