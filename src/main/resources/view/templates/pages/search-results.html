@@ -55,9 +55,12 @@
                                class="card-text mb-1">Longitude</p>
                             <p th:if="${sys != null}" th:text="'Country: ' + ${sys.getCountry()}"
                                class="card-text mb-1">Country</p>
-                            <div class="mt-auto">
-                                <button class="btn btn-primary w-100">Add</button>
-                            </div>
+                            <form th:action="@{/weather/add-location}" th:method="post">
+                                <div class="mt-auto">
+                                    <input type="hidden" name="locationKey" th:value="${locationKey}">
+                                    <button class="btn btn-primary w-100" type="submit">Add</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
