@@ -157,6 +157,15 @@ public class AuthDao {
         currentSession.createQuery("DELETE FROM Users ");
     }
 
+    public Users findById(int id) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        return currentSession.createQuery(
+                        "FROM Users u WHERE u.id = :id", Users.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+
+
 
 
 
