@@ -2,19 +2,14 @@ package com.example.dao;
 
 import com.example.models.Sessions;
 import com.example.models.Users;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -109,7 +104,7 @@ public class AuthDao {
     /**
      * Запрос ищет просроченные UUID и удаляет
      */
-    public void findAllExpiresat() {
+    public void removeAllExpiresatElseOverdueTime() {
         Session currentSession = sessionFactory.getCurrentSession();
 
         List<Sessions> expiresAt = currentSession.createQuery("from Sessions", Sessions.class)
@@ -151,6 +146,18 @@ public class AuthDao {
                 .setParameter("UUID", UUID)
                 .uniqueResult();
     }
+
+    public void deleteAllSessions() {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.createQuery("DELETE FROM Sessions ");
+    }
+
+    public void deleteAllUsers() {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.createQuery("DELETE FROM Users ");
+    }
+
+
 
 
 }

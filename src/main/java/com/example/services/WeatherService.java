@@ -2,8 +2,11 @@ package com.example.services;
 
 import com.example.dto.response.WeatherResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +22,12 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class WeatherService {
 
+    @Value("${API}")
+    private String API;
 
-    private final Environment environment;
 
     @SneakyThrows
     public WeatherResponseDto search(String nameCity) {
-        final var API = environment.getProperty("API");
         if (API == null || API.isBlank()) {
             throw new IllegalStateException("API ключ не корректный");
         }
