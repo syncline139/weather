@@ -16,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
 
 /**
  * В данным классе содержаться контроллеры относящиеся к аунтентификации
@@ -43,72 +42,83 @@ public class AuthController {
     }
 
     /**
-     *  TODO сделать документацию
+     * Добавляет нового юзера прошедшего валдиацию в БД
+     *
+     * @param user          передается человек уже с данными из формы
+     * @param bindingResult ошбики валидации
+     * @return перекидываем пользователя на страницу входа в акканут после успешной регестрации
      */
-    @PatchMapping("/sign-up")
-    public String registration(@ModelAttribute("user") @Valid Users user, BindingResult bindingResult) {
-        try {
-            authServices.save(user);
-        } catch (IllegalArgumentException e) {
-            if (e.getMessage().contains("Пароли")) {
-                bindingResult.rejectValue("confirmPassword", "error.confirmPassword", e.getMessage());
-            } else {
-                bindingResult.rejectValue("login", "error.login", e.getMessage());
-            }
-        } catch (IllegalStateException e) {
-            bindingResult.rejectValue("login", "error.login", e.getMessage());
-        }
+    @PostMapping("/sign-up")
+    public String registration(@ModelAttribute("user") @Valid Users user,
+                               BindingResult bindingResult) {
 
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "Пароли не совпадают");
+        }
+        if (!authDao.uniqueLogin(user.getLogin())) {
+            bindingResult.rejectValue("login", "error.login", "Пользователь с таким логином уже существует");
+        }
         if (bindingResult.hasErrors()) {
             return "auth/sign-up";
         }
 
+        authServices.save(user);
+
         return "auth/sign-in";
     }
 
-
     @GetMapping("/sign-in")
-    public String authorizationPage(Users user, Model model) {
-        model.addAttribute("user", user);
+    public String authorizationPage(Model model) {
+        model.addAttribute("user", new Users());
         return "auth/sign-in";
     }
 
     /**
-     * Котнроллер отвечает за обработку валидации и куков он ищет юзера по логину
-     * проходит все проверки и если вход успешен то пользотвалю отправляются куки
-     * которые мы обрабатываем в сервисе
+     * Контроллер отвечает за обработку валидации и кук. Он ищет юзера по логину,
+     * проходит все проверки и, если вход успешен, пользователю отправляются куки,
+     * которые мы обрабатываем в сервисе.
      *
-     * @param response опралвяем куки пользотвалю
-     * @return редирактим юзера на основню страницу
-     *      TODO печинить аунтетификацию
-     *      TODO при аунтентификации перебрасывает на страницу ошибки вместо того что бы выкинуть валидацию
+     * @param user          объект пользователя из формы
+     * @param bindingResult результат валидации
+     * @param response      отправляем куки пользователю
+     * @param request       для работы с сессией
+     * @param model         для передачи данных в шаблон
+     * @return редиректим юзера на основную страницу или возвращаем форму с ошибками
      */
     @PostMapping("/sign-in")
-    public String authentication(@ModelAttribute("login") Users user,
-                                BindingResult bindingResult,
-                                HttpServletResponse response,
-                                HttpServletRequest request) {
+    public String authentication(@ModelAttribute("user") Users user,
+                                 BindingResult bindingResult,
+                                 HttpServletResponse response,
+                                 HttpServletRequest request,
+                                 Model model) {
 
-        if (bindingResult.hasErrors()) {
-            return "auth/sign-in";
-        }
 
         Users byLogin = authDao.findByLogin(user.getLogin());
         if (byLogin == null) {
-            bindingResult.rejectValue("user", "error.user", "Пользователь не найден");
+            bindingResult.rejectValue("login", "error.login", "Пользователь не найден");
+            model.addAttribute("user", user);
             return "auth/sign-in";
         }
+
+        // Проверка пароля
         if (!PasswordUtil.checkPassword(user.getPassword(), byLogin.getPassword())) {
             bindingResult.rejectValue("password", "error.password", "Неверный пароль");
+            model.addAttribute("user", user);
             return "auth/sign-in";
         }
 
         authServices.createSession(byLogin, response);
-        request.getSession().setAttribute("login", user.getLogin()); // отправляем в сесиию логин пользователя
+        request.getSession().setAttribute("login", user.getLogin()); // Сохраняем логин в сессии
+        request.getSession().setAttribute("id", byLogin.getId()); // сохраняем ид в сессию
 
-        return "redirect:/";
+        return "redirect:/weather";
     }
 
+    /**
+     * После нажатия на кнопку 'logout' пользователю отправляем куки с чистой сессией и удаляем из БД
+     *
+     * @return редиректим юзера на страницу входа в акканут
+     */
     @DeleteMapping("/logout")
     public String signOut(HttpServletRequest request, HttpServletResponse response) {
         authServices.exit(request, response);

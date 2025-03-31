@@ -15,11 +15,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @IT
@@ -30,9 +30,11 @@ public class AuthServicesIT {
     public static final String LOGIN = "dispersion";
     public static final String PASSWORD = "sdfsfsdfsd";
     private AuthServices authServices;
+    private AuthDao authDao;
 
     @Autowired
-    public AuthServicesIT(AuthServices authServices) {
+    public AuthServicesIT(AuthServices authServices, AuthDao authDao) {
+        this.authDao = authDao;
         this.authServices = authServices;
     }
 
@@ -45,92 +47,14 @@ public class AuthServicesIT {
         user.setPassword(PASSWORD);
         user.setConfirmPassword(PASSWORD); // Пароли совпадают
 
-        // Создание мока и сервиса
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        // Настройка поведения мока
-        when(authDao.uniqueLogin(LOGIN)).thenReturn(true); // Логин уникален
-
         // Выполнение действия
         authServices.save(user);
 
         // Проверки
-        verify(authDao, times(1)).uniqueLogin(LOGIN); // Проверяем, что проверка уникальности вызвана
-        verify(authDao, times(1)).saveUser(user);     // Проверяем, что пользователь сохранен
         assertThat(user.getPassword()).isNotEqualTo(PASSWORD); // Пароль изменился (захеширован)
         assertThat(user.getPassword()).hasSize(60);   // Длина хеша соответствует ожидаемой (для BCrypt)
     }
 
-    @Test
-    @Tag("save")
-    void shouldThrowExceptionWhenUserIsNull() {
-        assertThatThrownBy(() -> authServices.save(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Пользователь не может быть null");
-    }
-
-    @Test
-    @Tag("save")
-    void shouldThrowExceptionWhenLoginIsNullOrEmpty() {
-        Users users1 = new Users();
-        users1.setLogin(null);
-        users1.setPassword(PASSWORD);
-        Users users2 = new Users();
-        users2.setLogin("");
-        users2.setPassword(PASSWORD);
-
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        assertAll(
-                () -> assertThatThrownBy(() -> authServices.save(users1))
-                        .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessage("Логин не может быть пустым или null"),
-                () -> assertThatThrownBy(() -> authServices.save(users2))
-                        .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessage("Логин не может быть пустым или null")
-        );
-    }
-
-    @Test
-    @Tag("save")
-    void shouldThrowExceptionWhenPasswordsDoNotMatch() {
-        Users users = new Users();
-        users.setLogin(LOGIN);
-        users.setPassword(PASSWORD);
-        users.setConfirmPassword("SDSADFSDAFSADF");
-
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-
-        assertThatThrownBy(() -> authServices.save(users))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Пароли не совпадают");
-    }
-
-    @Test
-    @Tag("save")
-    void shouldThrowExceptionWhenLoginIsNotUnique() {
-        Users users1 = new Users();
-        users1.setLogin(LOGIN);
-        users1.setPassword(PASSWORD);
-        users1.setConfirmPassword(PASSWORD);
-
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        authDao.saveUser(users1);
-        Users users2 = new Users();
-        users2.setLogin(LOGIN);
-        users2.setPassword("123");
-        users2.setConfirmPassword("123");
-
-        assertThatThrownBy(() -> authServices.save(users2))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageMatching("Пользователь с таким логином уже существует");
-    }
 
     @Test
     @Tag("createSession")
@@ -142,7 +66,7 @@ public class AuthServicesIT {
         user.setPassword(PASSWORD);
         user.setConfirmPassword(PASSWORD);
 
-        this.authServices.createSession(user, response);
+        authServices.createSession(user, response);
 
         Cookie[] cookies = response.getCookies();
 
@@ -156,8 +80,6 @@ public class AuthServicesIT {
     void shouldThrowExceptionWhenUserIsNullInCreateSession() {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
 
         assertThatThrownBy(() -> authServices.createSession(null, response))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -170,29 +92,12 @@ public class AuthServicesIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
 
         assertThatThrownBy(() -> authServices.exit(request, response))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("куки не должны быть null AuthServices/exit");
     }
 
-    @Test
-    @Tag("exit")
-    void shouldThrowExceptionWhenSessionNameIsInvalidInExit() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        request.setCookies(new Cookie("cookie", "fake"));
-
-        assertThatThrownBy(() -> authServices.exit(request, response))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Невереное название сессии AuthServices/exit");
-    }
 
     @Test
     @Tag("exit")
@@ -200,8 +105,6 @@ public class AuthServicesIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
 
         request.setCookies(new Cookie("SESSIONID", ""));
 
@@ -217,63 +120,31 @@ public class AuthServicesIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie("SESSIONID", "invalid-uuid-string"));
 
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        when(authDao.findByUUID("invalid-uuid-string")).thenReturn(true);
-
-        authServices.exit(request, response);
-
-        verify(authDao, times(1)).findByUUID("invalid-uuid-string");
-        verify(authDao, never()).findSessionByUUID(any(UUID.class));
-    }
-
-    @Test
-    @Tag("exit")
-    void shouldThrowExceptionWhenSessionIsNullInExit() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        String sessionIdStr = UUID.randomUUID().toString();
-        request.setCookies(new Cookie("SESSIONID", sessionIdStr));
-
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-
-        when(authDao.findByUUID(sessionIdStr)).thenReturn(true);
-        when(authDao.findSessionByUUID(any(UUID.class))).thenReturn(null);
 
         assertThatThrownBy(() -> authServices.exit(request, response))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Сессия не должна быть null AuthServices/exit");
-
-        verify(authDao, times(1)).findByUUID(sessionIdStr);
-        verify(authDao, times(1)).findSessionByUUID(UUID.fromString(sessionIdStr));
-        verify(authDao, never()).deleteSession(any(Sessions.class));
-
-        when(authDao.findByUUID(sessionIdStr)).thenReturn(true);
-        when(authDao.findSessionByUUID(any(UUID.class))).thenReturn(null);
+                .hasMessage("UUID не найдено в БД AuthServices/exit");
     }
+
 
     @Test
     @Tag("exit")
     void shouldExitWithValidSession() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
-        String sessionIdStr = UUID.randomUUID().toString();
-        request.setCookies(new Cookie("SESSIONID", sessionIdStr));
+        Users user = new Users();
+        user.setPassword(PASSWORD);
+        user.setLogin(PasswordUtil.hashPassword(PASSWORD));
+        authDao.saveUser(user);
+        Sessions session = new Sessions();
+        session.setUser(user);
+        session.setExpiresAt(LocalDateTime.now().plusDays(1));
+        authDao.saveSession(session);
 
-        AuthDao authDao = mock(AuthDao.class);
-        Sessions sessions = new Sessions();
-        sessions.setUser(new Users());
-        sessions.setExpiresAt(LocalDateTime.now().plusYears(1));
-        AuthServices authServices = new AuthServices(authDao);
-
-        when(authDao.findByUUID(sessionIdStr)).thenReturn(true);
-        when(authDao.findSessionByUUID(UUID.fromString(sessionIdStr))).thenReturn(sessions);
+        request.setCookies(new Cookie("SESSIONID", session.getId().toString()));
 
         authServices.exit(request, response);
 
-        verify(authDao, times(1)).deleteSession(sessions);
         Cookie[] cookies = response.getCookies();
         assertThat(cookies[0].getName()).isEqualTo("SESSIONID");
         assertThat(cookies).hasSize(1);
@@ -283,26 +154,72 @@ public class AuthServicesIT {
     }
 
     @Test
+    @Tag("sessionClear")
     void shouldCallFindAllExpiresAtInSessionClear() {
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
+        Users user = new Users();
+        user.setLogin(LOGIN);
+        user.setPassword(PasswordUtil.hashPassword(PASSWORD));
+        authDao.saveUser(user);
+
+        Sessions session = new Sessions();
+        session.setUser(user);
+        LocalDateTime expiresSoon = LocalDateTime.now().minusHours(2); // просроченно на 2 часа
+        session.setExpiresAt(expiresSoon);
+        authDao.saveSession(session);
 
         authServices.sessionClear();
 
-        verify(authDao, times(1)).findAllExpiresat();
+        assertThat(authDao.findAllSession()).isEmpty();
+    }
+    @Test
+    @Tag("extendSessions")
+    void shouldExtendSessions() {
+        Users user = new Users();
+        user.setLogin(LOGIN);
+        user.setPassword(PasswordUtil.hashPassword(PASSWORD));
+        authDao.saveUser(user);
+
+        Sessions session = new Sessions();
+        session.setUser(user);
+        LocalDateTime expiresSoon = LocalDateTime.now().plusHours(2); // истекает через 2 часа
+        session.setExpiresAt(expiresSoon);
+        authDao.saveSession(session);
+
+        authServices.extendSessions();
+
+        Sessions updatedSession = authDao.findSessionByUUID(session.getId());
+        LocalDateTime expectedNewExpiresAt = LocalDateTime.now().plusDays(1);
+        assertThat(updatedSession.getExpiresAt())
+                .isAfter(expiresSoon) // -> новое время больше старого
+                .isCloseTo(expectedNewExpiresAt, within(1, ChronoUnit.MINUTES));
     }
 
     @Test
-    void shouldExtendSessions() {
-        AuthDao authDao = mock(AuthDao.class);
-        AuthServices authServices = new AuthServices(authDao);
-        Sessions sessions = new Sessions();
-        sessions.setUser(new Users());
-        sessions.setExpiresAt(LocalDateTime.now().plusDays(1));
+    @Tag("extendSessions")
+    void shouldNotExtendSessionWhenExpiresInMoreThanThreeHours() {
+        Users user = new Users();
+        user.setLogin(LOGIN);
+        user.setPassword(PasswordUtil.hashPassword(PASSWORD));
+        authDao.saveUser(user);
 
-        authDao.saveSession(sessions);
+        Sessions session = new Sessions();
+        session.setUser(user);
+        LocalDateTime expiresSoon = LocalDateTime.now().plusHours(4); // истекает через 4 часа
+        session.setExpiresAt(expiresSoon);
+        authDao.saveSession(session);
+
         authServices.extendSessions();
 
-        verify(authDao, times(1)).saveSession(sessions);
+        Sessions updatedSession = authDao.findSessionByUUID(session.getId());
+        assertThat(updatedSession.getExpiresAt())
+                .isEqualTo(expiresSoon); // время не изменилоась
+    }
+
+    @Test
+    @Tag("extendSessions")
+    void shouldHandleEmptySessionList() {
+        authServices.extendSessions();
+        List<Sessions> allSession = authDao.findAllSession();
+        assertThat(allSession).isEmpty();
     }
 }

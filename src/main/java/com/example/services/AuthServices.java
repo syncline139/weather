@@ -7,18 +7,13 @@ import com.example.util.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ImportSelector;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +27,7 @@ public class AuthServices {
 
     private final AuthDao authDao;
 
+    private volatile boolean isShuttingDown = false; // Флаг остановки
 
     /**
      * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль
@@ -40,27 +36,17 @@ public class AuthServices {
      */
     public void save(Users user) {
 
-        if (user == null) {
-            throw new IllegalArgumentException("Пользователь не может быть null");
-        }
-
         String login = user.getLogin();
 
-        if (login == null || login.isEmpty()) {
-            throw new IllegalArgumentException("Логин не может быть пустым или null");
-        }
+        if (user.getPassword() != null &&
+                user.getPassword().equals(user.getConfirmPassword()) &&
+                authDao.uniqueLogin(login)) {
 
-        if (!user.getPassword().equals(user.getConfirmPassword())) {
-            throw new IllegalArgumentException("Пароли не совпадают");
-        }
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
 
-        if (!authDao.uniqueLogin(login)) {
-            throw new IllegalStateException("Пользователь с таким логином уже существует");
+            authDao.saveUser(user);
         }
-
-        String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
-        user.setPassword(hashedPassword);
-        authDao.saveUser(user);
     }
 
     /**
@@ -129,8 +115,6 @@ public class AuthServices {
                     } else {
                         throw new IllegalArgumentException("UUID не найдено в БД AuthServices/exit");
                     }
-                } else {
-                    throw new IllegalArgumentException("Невереное название сессии AuthServices/exit");
                 }
             }
         } else {
@@ -144,15 +128,23 @@ public class AuthServices {
      */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void sessionClear() {
-        authDao.findAllExpiresat();
+        if (!isShuttingDown) { // Проверяем флаг
+            authDao.removeAllExpiresatElseOverdueTime();
+            System.out.println("Периодическая очистка просроченных сессий выполнена!");
+        }
+    }
+
+    public void setShuttingDown(boolean shuttingDown) {
+        this.isShuttingDown = shuttingDown; // Устанавливаем флаг
     }
 
     /**
-     * Метод регулярно (каждые 22 часа) проверяет все активные сессии.
+     * Метод регулярно (каждый час ) проверяет все активные сессии.
      * Если до истечения сессии осталось менее 3 часов, то считается
      * что пользователь был активен недавно и сессия продлевается на один день от текущего момента
      */
-    @Scheduled(fixedRate = 4752000 * 1000) // каждые 22 часа
+    @Scheduled(fixedRate = 3600 * 1000) // каждый час
+
     public void extendSessions() {
 
         List<Sessions> sessionsList = authDao.findAllSession();

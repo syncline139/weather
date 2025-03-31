@@ -31,7 +31,6 @@ public class Locations {
     @Column(name = "longitude")
     private double longitude;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;

@@ -19,17 +19,17 @@ public class UserFilter implements Filter {
     private final AuthDao authDao;
 
 
-
     /**
      * Фильтр для проверки аутентификации юзера
      * Данный фильтр выполняет следующие действия:
-     *  -> Проверяет наличие cookie с именем "SESSIONID" и валидирует сессию
-     *  -> Не дает юзеру зайти на страницу регестрации или авторизации если тот аутентифицирован
-     *  -> Не дает юзера зайти на на страници пока тот не аутентифицирован
+     * -> Проверяет наличие cookie с именем "SESSIONID" и валидирует сессию
+     * -> Не дает юзеру зайти на страницу регестрации или авторизации если тот аутентифицирован
+     * -> Не дает юзера зайти на на страници пока тот не аутентифицирован
+     *
      * @param servletRequest  запрос
      * @param servletResponse ответ
-     * @param filterChain цепочка фильтров через которую передается запрос
-     * @throws IOException в случае ошибки ввода/вывода
+     * @param filterChain     цепочка фильтров через которую передается запрос
+     * @throws IOException      в случае ошибки ввода/вывода
      * @throws ServletException в случае ошибки сервлета
      */
     @Override
@@ -57,6 +57,11 @@ public class UserFilter implements Filter {
         }
 
         if (authenticatedValid && (path.equals("/auth/sign-in") || path.equals("/auth/sign-up"))) {
+            response.sendRedirect(request.getContextPath() + "/weather");
+            return;
+        }
+
+        if (authenticatedValid && (path.equals("/"))) {
             response.sendRedirect(request.getContextPath() + "/weather");
             return;
         }

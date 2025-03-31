@@ -1,36 +1,38 @@
 package com.example.services;
 
-import com.example.dao.AuthDao;
-import com.example.dto.response.WeatherDto;
+import com.example.dto.response.WeatherResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
 
-    private final AuthDao authDao;
-    private final Environment environment;
+    @Value("${API}")
+    private String API;
+
 
     @SneakyThrows
-    public WeatherDto search(String nameCity) {
-        String apiKey = environment.getProperty("API");
-        if (apiKey == null) {
-            throw new IllegalArgumentException("API ключ не задан");
+    public WeatherResponseDto search(String nameCity) {
+        if (API == null || API.isBlank()) {
+            throw new IllegalStateException("API ключ не корректный");
         }
-        if (nameCity == null || nameCity.trim().isEmpty()) {
-            throw new IllegalArgumentException("Город не может быть null или пустым");
-        }
-
-        String url = "https://api.openweathermap.org/data/2.5/weather?q=" + nameCity + "&appid=" + apiKey + "&units=metric";
+        String encoderCity = URLEncoder.encode(nameCity, StandardCharsets.UTF_8.toString());
+        var url = "https://api.openweathermap.org/data/2.5/weather?q=" + encoderCity + "&appid=" + API;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -39,12 +41,12 @@ public class WeatherService {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         if (response.statusCode() != 200) {
-            throw new RuntimeException("Ошибка API: " + response.statusCode());
+            throw new IOException("Не удалось получить данные о погоде: " + response.statusCode());
         }
 
-        String json = response.body();
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(json, WeatherDto.class);
+        return mapper.readValue(response.body(), WeatherResponseDto.class);
     }
 }

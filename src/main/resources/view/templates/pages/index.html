@@ -11,7 +11,7 @@
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
-            <img src="images/weather-app.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+            <img src="/images/weather-app.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
             Weather Tracker
         </a>
         <div class="d-flex align-items-center">
@@ -25,19 +25,18 @@
 
 <section id="page-content">
     <div class="container mt-4">
-        <div class="d-flex my-4">
-            <form th:action="@{/weather}" method="post" class="d-flex my-4">
+        <form th:action="@{/weather/search-results}" th:method="POST">
+            <div class="d-flex my-4">
                 <div class="input-group location-search-input-group me-3">
                     <input class="form-control" type="text" name="nameCity" placeholder="Enter location" required>
                     <button class="btn btn-outline-secondary btn-sm clear-input-button" type="button"
                             onclick="this.previousElementSibling.value=''">
-                        ×
+                        &times;
                     </button>
                 </div>
-                <button type="submit" class="btn btn-outline-success">Search</button>
-            </form>
-        </div>
-
+                <button class="btn btn-outline-success">Search</button>
+            </div>
+        </form>
         <div>
             <div class="row">
                 <div class="col-12 col-lg-3 col-md-6 mb-4">

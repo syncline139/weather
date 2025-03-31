@@ -131,7 +131,7 @@ public class AuthDaoTest {
 
     @Test
     @Tag("findAllExpiresat")
-    void findAllExpiresat() {
+    void removeAllExpiresatElseOverdueTime() {
         Sessions sessions = new Sessions();
         Users user = new Users();
         user.setLogin(LOGIN);
@@ -145,7 +145,7 @@ public class AuthDaoTest {
         authDao.saveSession(sessions);
         UUID uuid = sessions.getId();
 
-        authDao.findAllExpiresat();
+        authDao.removeAllExpiresatElseOverdueTime();
 
         Sessions foundSession = sessionFactory
                 .getCurrentSession()
