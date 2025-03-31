@@ -27,7 +27,7 @@ public class AuthServices {
 
     private final AuthDao authDao;
 
-
+    private volatile boolean isShuttingDown = false; // Флаг остановки
 
     /**
      * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль
@@ -128,7 +128,14 @@ public class AuthServices {
      */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void sessionClear() {
-        authDao.removeAllExpiresatElseOverdueTime();
+        if (!isShuttingDown) { // Проверяем флаг
+            authDao.removeAllExpiresatElseOverdueTime();
+            System.out.println("Периодическая очистка просроченных сессий выполнена!");
+        }
+    }
+
+    public void setShuttingDown(boolean shuttingDown) {
+        this.isShuttingDown = shuttingDown; // Устанавливаем флаг
     }
 
     /**
@@ -137,6 +144,7 @@ public class AuthServices {
      * что пользователь был активен недавно и сессия продлевается на один день от текущего момента
      */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
+
     public void extendSessions() {
 
         List<Sessions> sessionsList = authDao.findAllSession();

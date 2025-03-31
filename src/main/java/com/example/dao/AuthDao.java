@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.models.Sessions;
 import com.example.models.Users;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -149,7 +150,7 @@ public class AuthDao {
 
     public void deleteAllSessions() {
         Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.createQuery("DELETE FROM Sessions ");
+        currentSession.createQuery("DELETE FROM Sessions ").executeUpdate();
     }
 
     public void deleteAllUsers() {
