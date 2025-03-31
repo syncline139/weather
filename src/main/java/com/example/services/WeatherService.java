@@ -2,12 +2,9 @@ package com.example.services;
 
 import com.example.dto.response.WeatherResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,7 +24,7 @@ public class WeatherService {
 
 
     @SneakyThrows
-    public WeatherResponseDto search(String nameCity) {
+    public WeatherResponseDto searchCity(String nameCity) {
         if (API == null || API.isBlank()) {
             throw new IllegalStateException("API ключ не корректный");
         }

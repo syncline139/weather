@@ -1,5 +1,6 @@
 package com.example.dao;
 
+import com.example.dto.response.LocationResponseDto;
 import com.example.models.Locations;
 import com.example.models.Sessions;
 import com.example.services.LocationService;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
 
 @Repository
@@ -42,5 +44,20 @@ public class LocationDao {
         return result != null;
     }
 
+    public List<Locations> findLocationsByUserId(int userId) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        return currentSession.createQuery("from Locations l where l.user.id = :userId", Locations.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
+
+    public void deleteLocationById(int locationId) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.createQuery("DELETE FROM Locations where id = :locationId")
+                .setParameter("locationId", locationId)
+                .executeUpdate();
+
+    }
 
 }

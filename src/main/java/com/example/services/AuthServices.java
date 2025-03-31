@@ -27,6 +27,7 @@ public class AuthServices {
 
     private final AuthDao authDao;
 
+    // нужен для того что бы пока приложение останавливается, операция не выполнялась
     private volatile boolean isShuttingDown = false; // Флаг остановки
 
     /**
@@ -130,7 +131,6 @@ public class AuthServices {
     public void sessionClear() {
         if (!isShuttingDown) { // Проверяем флаг
             authDao.removeAllExpiresatElseOverdueTime();
-            System.out.println("Периодическая очистка просроченных сессий выполнена!");
         }
     }
 

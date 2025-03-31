@@ -17,7 +17,7 @@ public class WeatherInitializer implements WebApplicationInitializer {
         context.register(com.example.config.SpringConfig.class);
 
         servletContext.addListener(new ContextLoaderListener(context));
-        servletContext.addListener(new AppStartupListener());
+        servletContext.addListener(new AppStartupListener());  // включаем в жизненный цикл наш очиститель сессий
 
         FilterRegistration.Dynamic userFilter = servletContext.addFilter("userFilter",
                 new DelegatingFilterProxy("userFilter"));
