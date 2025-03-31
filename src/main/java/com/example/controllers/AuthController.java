@@ -109,7 +109,7 @@ public class AuthController {
 
         authServices.createSession(byLogin, response);
         request.getSession().setAttribute("login", user.getLogin()); // Сохраняем логин в сессии
-        request.getSession().setAttribute("id", byLogin.getId());
+        request.getSession().setAttribute("id", byLogin.getId()); // сохраняем ид в сессию
 
         return "redirect:/weather";
     }

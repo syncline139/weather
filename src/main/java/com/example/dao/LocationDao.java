@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Repository
 @Transactional
 @RequiredArgsConstructor
@@ -26,6 +28,18 @@ public class LocationDao {
         }
         Session currentSession = sessionFactory.getCurrentSession();
         currentSession.persist(locations);
+    }
+
+    public boolean uniqueLocationDate(double lat, double lon, int id) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        Integer result = currentSession
+                .createQuery("select l.id from Locations l where l.latitude = :lat and l.longitude = :lon and l.user.id = :id", Integer.class)
+                .setParameter("lat", lat)
+                .setParameter("lon", lon)
+                .setParameter("id", id)
+                .getSingleResultOrNull();
+
+        return result != null;
     }
 
 
