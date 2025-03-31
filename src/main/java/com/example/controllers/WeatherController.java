@@ -39,7 +39,7 @@ public class WeatherController {
      * @return возвращаем основную страницу с карточками
      */
     @GetMapping()
-    public String mainScreenPage(HttpServletRequest request, Model model) {
+    public String mainScreenPage(HttpServletRequest request, Model model,HttpSession httpSession) {
 
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -89,13 +89,13 @@ public class WeatherController {
             return "redirect:/weather";
         }
 
-
         String locationKey = UUID.randomUUID().toString(); // ключ для каждоый локации
         Map<String, WeatherResponseDto> pendingLocations = (Map<String, WeatherResponseDto>) session.getAttribute("pendingLocations");
         if (pendingLocations == null) {
             pendingLocations = new HashMap<>();
             session.setAttribute("pendingLocations", pendingLocations);
         }
+
         pendingLocations.put(locationKey, search);
         model.addAttribute("locationKey", locationKey); // Передаём ключ на фронтенд
         model.addAttribute("nameCity", search.getName());
@@ -108,6 +108,7 @@ public class WeatherController {
     @PostMapping("/add-location")
     public String addLocation(@RequestParam("locationKey") String locationKey,
                               HttpSession session) {
+
         Map<String, WeatherResponseDto> pendingLocations = (Map<String, WeatherResponseDto>) session.getAttribute("pendingLocations");
         if (pendingLocations != null) {
             WeatherResponseDto responseDto = pendingLocations.get(locationKey);
