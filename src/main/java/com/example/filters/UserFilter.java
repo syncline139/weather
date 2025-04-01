@@ -40,6 +40,12 @@ public class UserFilter implements Filter {
 
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
+        if (path.startsWith("/css/") || path.startsWith("/images/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+
         Cookie[] cookies = request.getCookies();
         boolean authenticatedValid = false;
         if (cookies != null) {
