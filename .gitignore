@@ -14,6 +14,7 @@ target/
 *.iml
 *.iws
 hibernate.properties
+application-test.properties
 *.ipr
 out/
 todo
