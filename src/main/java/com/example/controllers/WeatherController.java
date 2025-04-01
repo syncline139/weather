@@ -131,7 +131,7 @@ public class WeatherController {
         }
 
         pendingLocations.put(locationKey, search);
-        model.addAttribute("locationKey", locationKey); // Передаём ключ на фронтенд
+        model.addAttribute("locationKey", locationKey);
         model.addAttribute("nameCity", search.getName());
         model.addAttribute("coord", search.getCoord());
         model.addAttribute("sys", search.getSys());
