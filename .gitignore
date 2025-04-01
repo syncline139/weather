@@ -13,6 +13,7 @@ target/
 .idea/
 *.iml
 *.iws
+hibernate.properties
 *.ipr
 out/
 todo

@@ -4,8 +4,8 @@ import com.example.dao.AuthDao;
 import com.example.integration.annotation.IT;
 import com.example.models.Sessions;
 import com.example.models.Users;
-import com.example.services.AuthServices;
-import com.example.util.PasswordUtil;
+import com.example.services.AuthService;
+import com.example.utils.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -20,22 +20,21 @@ import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @IT
 @Tag("AuthServicesTest")
 @Transactional
-public class AuthServicesIT {
+public class AuthServiceIT {
 
     public static final String LOGIN = "dispersion";
     public static final String PASSWORD = "sdfsfsdfsd";
-    private AuthServices authServices;
+    private AuthService authService;
     private AuthDao authDao;
 
     @Autowired
-    public AuthServicesIT(AuthServices authServices, AuthDao authDao) {
+    public AuthServiceIT(AuthService authService, AuthDao authDao) {
         this.authDao = authDao;
-        this.authServices = authServices;
+        this.authService = authService;
     }
 
     @Test
@@ -48,7 +47,7 @@ public class AuthServicesIT {
         user.setConfirmPassword(PASSWORD); // Пароли совпадают
 
         // Выполнение действия
-        authServices.save(user);
+        authService.save(user);
 
         // Проверки
         assertThat(user.getPassword()).isNotEqualTo(PASSWORD); // Пароль изменился (захеширован)
@@ -66,7 +65,7 @@ public class AuthServicesIT {
         user.setPassword(PASSWORD);
         user.setConfirmPassword(PASSWORD);
 
-        authServices.createSession(user, response);
+        authService.createSession(user, response);
 
         Cookie[] cookies = response.getCookies();
 
@@ -81,7 +80,7 @@ public class AuthServicesIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-        assertThatThrownBy(() -> authServices.createSession(null, response))
+        assertThatThrownBy(() -> authService.createSession(null, response))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("user не может быть null ( AuthServices/createSession");
     }
@@ -93,7 +92,7 @@ public class AuthServicesIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-        assertThatThrownBy(() -> authServices.exit(request, response))
+        assertThatThrownBy(() -> authService.exit(request, response))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("куки не должны быть null AuthServices/exit");
     }
@@ -108,7 +107,7 @@ public class AuthServicesIT {
 
         request.setCookies(new Cookie("SESSIONID", ""));
 
-        assertThatThrownBy(() -> authServices.exit(request, response))
+        assertThatThrownBy(() -> authService.exit(request, response))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("UUID не найдено в БД AuthServices/exit");
     }
@@ -121,7 +120,7 @@ public class AuthServicesIT {
         request.setCookies(new Cookie("SESSIONID", "invalid-uuid-string"));
 
 
-        assertThatThrownBy(() -> authServices.exit(request, response))
+        assertThatThrownBy(() -> authService.exit(request, response))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("UUID не найдено в БД AuthServices/exit");
     }
@@ -143,7 +142,7 @@ public class AuthServicesIT {
 
         request.setCookies(new Cookie("SESSIONID", session.getId().toString()));
 
-        authServices.exit(request, response);
+        authService.exit(request, response);
 
         Cookie[] cookies = response.getCookies();
         assertThat(cookies[0].getName()).isEqualTo("SESSIONID");
@@ -167,7 +166,7 @@ public class AuthServicesIT {
         session.setExpiresAt(expiresSoon);
         authDao.saveSession(session);
 
-        authServices.sessionClear();
+        authService.sessionClear();
 
         assertThat(authDao.findAllSession()).isEmpty();
     }
@@ -185,7 +184,7 @@ public class AuthServicesIT {
         session.setExpiresAt(expiresSoon);
         authDao.saveSession(session);
 
-        authServices.extendSessions();
+        authService.extendSessions();
 
         Sessions updatedSession = authDao.findSessionByUUID(session.getId());
         LocalDateTime expectedNewExpiresAt = LocalDateTime.now().plusDays(1);
@@ -208,7 +207,7 @@ public class AuthServicesIT {
         session.setExpiresAt(expiresSoon);
         authDao.saveSession(session);
 
-        authServices.extendSessions();
+        authService.extendSessions();
 
         Sessions updatedSession = authDao.findSessionByUUID(session.getId());
         assertThat(updatedSession.getExpiresAt())
@@ -218,7 +217,7 @@ public class AuthServicesIT {
     @Test
     @Tag("extendSessions")
     void shouldHandleEmptySessionList() {
-        authServices.extendSessions();
+        authService.extendSessions();
         List<Sessions> allSession = authDao.findAllSession();
         assertThat(allSession).isEmpty();
     }

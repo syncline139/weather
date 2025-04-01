@@ -1,14 +1,11 @@
 package com.example.controllers;
 
 import com.example.dao.AuthDao;
-import com.example.models.Sessions;
 import com.example.models.Users;
-import com.example.services.AuthServices;
-import com.example.util.PasswordUtil;
-import jakarta.servlet.http.Cookie;
+import com.example.services.AuthService;
+import com.example.utils.PasswordUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthDao authDao;
-    private final AuthServices authServices;
+    private final AuthService authService;
 
 
     /**
@@ -62,7 +59,7 @@ public class AuthController {
             return "auth/sign-up";
         }
 
-        authServices.save(user);
+        authService.save(user);
 
         return "auth/sign-in";
     }
@@ -107,7 +104,7 @@ public class AuthController {
             return "auth/sign-in";
         }
 
-        authServices.createSession(byLogin, response);
+        authService.createSession(byLogin, response);
         request.getSession().setAttribute("login", user.getLogin()); // Сохраняем логин в сессии
         request.getSession().setAttribute("id", byLogin.getId()); // сохраняем ид в сессию
 
@@ -121,7 +118,7 @@ public class AuthController {
      */
     @DeleteMapping("/logout")
     public String signOut(HttpServletRequest request, HttpServletResponse response) {
-        authServices.exit(request, response);
+        authService.exit(request, response);
         return "redirect:/auth/sign-in";
     }
 

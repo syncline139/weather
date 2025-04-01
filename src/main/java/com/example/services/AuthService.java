@@ -3,7 +3,7 @@ package com.example.services;
 import com.example.dao.AuthDao;
 import com.example.models.Sessions;
 import com.example.models.Users;
-import com.example.util.PasswordUtil;
+import com.example.utils.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 @EnableScheduling
 @RequiredArgsConstructor
-public class AuthServices {
+public class AuthService {
 
     private final AuthDao authDao;
 

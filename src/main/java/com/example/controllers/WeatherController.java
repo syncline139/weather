@@ -1,7 +1,7 @@
 package com.example.controllers;
 
 import com.example.dao.LocationDao;
-import com.example.dto.WeatherCardDto;
+import com.example.dto.response.WeatherCardDto;
 import com.example.dto.response.LocationResponseDto;
 import com.example.dto.response.WeatherResponseDto;
 import com.example.models.Locations;

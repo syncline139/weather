@@ -1,0 +1,9 @@
+hibernate.driver_class=org.postgresql.Driver
+hibernate.connection.url=jdbc:postgresql://localhost:5432/project_weather
+hibernate.connection.username=YOUR_USERNAME
+hibernate.connection.password=YOUR_PASSWORD
+
+hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+hibernate.show_sql=true
+
+API=YOUR_API_KEY

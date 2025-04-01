@@ -1,6 +1,5 @@
-package com.example.utils;
+package com.example.config;
 
-import com.example.config.AppStartupListener;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
