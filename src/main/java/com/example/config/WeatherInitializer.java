@@ -1,4 +1,4 @@
-package com.example.util;
+package com.example.utils;
 
 import com.example.config.AppStartupListener;
 import jakarta.servlet.FilterRegistration;
