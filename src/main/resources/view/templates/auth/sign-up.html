@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Weather Viewer – Sign Up</title>
+    <title>Просмотр Погоды – Регистрация</title>
     <link rel="icon" type="image/png" href="/images/weather-app.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 <body>
 
@@ -17,31 +16,29 @@
         </div>
     </div>
 
-    <h2 class="text-center mb-5">Sign Up</h2>
+    <h2 class="text-center mb-5">Регистрация</h2>
 
     <div class="row justify-content-center">
         <div class="col-12 col-lg-4 col-md-6 col-sm-12">
             <form th:action="@{/auth/sign-up}" th:method="POST" th:object="${user}" class="mt-4">
                 <div class="mb-3">
-                    <label for="login" class="form-label">login</label>
+                    <label for="login" class="form-label">Логин</label>
                     <input type="text" class="form-control" id="login" name="login" required value=""/>
-                    <div style="color: red" th:if="${#fields.hasErrors('login')}" th:errors="*{login}">Error</div>
+                    <div style="color: red" th:if="${#fields.hasErrors('login')}" th:errors="*{login}">Ошибка</div>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">Пароль</label>
                     <input type="password" class="form-control" id="password" name="password" required value=""/>
-                    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
-
+                    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Ошибка</div>
                 </div>
                 <div class="mb-3">
-                    <label for="repeat-password" class="form-label">Repeat password</label>
+                    <label for="repeat-password" class="form-label">Повторите пароль</label>
                     <input type="password" class="form-control" id="repeat-password" name="confirmPassword" required value=""/>
-                    <div style="color: red" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Error</div>
+                    <div style="color: red" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Ошибка</div>
                 </div>
 
-
-                <button type="submit" class="btn btn-primary w-100 mt-3">Sign Up</button>
-                <p class="mt-2 text-center">Already have an account? <a href="/auth/sign-in">Sign in here</a></p>
+                <button type="submit" class="btn btn-primary w-100 mt-3">Зарегистрироваться</button>
+                <p class="mt-2 text-center">Уже есть аккаунт? <a href="/auth/sign-in">Войти здесь</a></p>
             </form>
         </div>
     </div>

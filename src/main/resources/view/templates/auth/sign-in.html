@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Weather Viewer – Sign In</title>
+    <title>Просмотр погоды – Вход</title>
     <link rel="icon" type="image/png" href="/images/weather-app.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
@@ -16,25 +16,24 @@
         </div>
     </div>
 
-    <h2 class="text-center mb-5">Sign In</h2>
+    <h2 class="text-center mb-5">Вход</h2>
 
     <div class="row justify-content-center">
         <div class="col-12 col-lg-4 col-md-6 col-sm-12">
             <form th:action="@{/auth/sign-in}" th:method="POST" th:object="${user}" class="mt-4">
                 <div class="mb-3">
-                    <label for="login" class="form-label">login</label>
+                    <label for="login" class="form-label">Логин</label>
                     <input type="text" class="form-control" id="login" name="login" required value=""/>
-                    <div style="color: red" th:if="${#fields.hasErrors('login')}" th:errors="*{login}">Error</div>
+                    <div style="color: red" th:if="${#fields.hasErrors('login')}" th:errors="*{login}">Ошибка</div>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">Пароль</label>
                     <input type="password" class="form-control" id="password" name="password" required value=""/>
-                    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
+                    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Ошибка</div>
                 </div>
 
-
-                <button type="submit" class="btn btn-primary w-100 mt-3">Sign In</button>
-                <p class="mt-2 text-center">Don't have an account? <a href="/auth/sign-up">Sign up here</a></p>
+                <button type="submit" class="btn btn-primary w-100 mt-3">Войти</button>
+                <p class="mt-2 text-center">Нет аккаунта? <a href="/auth/sign-up">Зарегистрируйтесь здесь</a></p>
             </form>
         </div>
     </div>
