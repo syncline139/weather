@@ -21,6 +21,7 @@
 ![maven-logo](https://github.com/VladislavLevchikIsAProger/tennis_scoreboard/assets/153897612/159c5f30-83db-49a2-906a-fc92a071eeff)
 ![opeanweatherapi](https://github.com/VladislavLevchikIsAProger/weather_tracker/assets/153897612/78bce6ce-0faf-4d08-bf48-cc12cea9cc83)
 ![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=black)
+![Flyway](https://img.shields.io/badge/Flyway-CC0000?style=for-the-badge&logo=flyway&logoColor=white)
 
 ### Тестирование
 
