@@ -76,7 +76,6 @@ public class WeatherController {
             }
         }
 
-
         return "redirect:/weather";
     }
 
