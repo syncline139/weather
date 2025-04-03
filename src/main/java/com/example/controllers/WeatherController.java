@@ -37,6 +37,10 @@ public class WeatherController {
         String login = (String) httpSession.getAttribute("login");
         Integer userId = (Integer) httpSession.getAttribute("id");
 
+        if (userId == null) {
+            return "redirect:/auth/sign-in";
+        }
+
         model.addAttribute("login", login);
 
         List<Locations> locations = locationDao.findLocationsByUserId(userId);

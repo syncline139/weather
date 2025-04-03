@@ -1,6 +1,7 @@
 package com.example.filters;
 
 import com.example.dao.AuthDao;
+import com.example.models.Sessions;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component("userFilter")
 @RequiredArgsConstructor
@@ -52,9 +54,14 @@ public class UserFilter implements Filter {
                     sessionId = c.getValue();
                     if (authDao.findByUUID(sessionId)) {
                         authenticatedValid = true;
+                        // Восстанавливаем атрибуты сессии
+                        Sessions session = authDao.findSessionByUUID(UUID.fromString(sessionId.toString())); // Предполагается, что у тебя есть такой метод
+                        if (session != null && session.getUser() != null) {
+                            request.getSession().setAttribute("id", session.getUser().getId());
+                            request.getSession().setAttribute("login", session.getUser().getLogin());
+                        }
                         break;
                     } else {
-                        // Если сессия невалидна, удаляем куку
                         Cookie cookie = new Cookie("SESSIONID", null);
                         cookie.setPath("/");
                         cookie.setMaxAge(0);
@@ -79,7 +86,10 @@ public class UserFilter implements Filter {
             return;
         }
 
-        filterChain.doFilter(request, response);
+
+        if (!response.isCommitted()) {
+            filterChain.doFilter(request, response);
+        }
     }
 
 }
