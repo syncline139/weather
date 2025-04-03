@@ -28,7 +28,7 @@ public class AuthService {
     private final AuthDao authDao;
 
     // нужен для того что бы пока приложение останавливается, операция не выполнялась
-    private volatile boolean isShuttingDown = false; // Флаг остановки
+    private volatile boolean isShuttingDown = false;
 
     /**
      * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль
@@ -110,6 +110,7 @@ public class AuthService {
                             cookie.setPath("/");
                             cookie.setMaxAge(0);
                             response.addCookie(cookie);
+                            request.getSession().invalidate();
                         } else {
                             throw new IllegalArgumentException("Сессия не должна быть null AuthServices/exit");
                         }

@@ -33,17 +33,9 @@ public class WeatherController {
      * @return возвращаем основную страницу с карточками
      */
     @GetMapping
-    public String mainScreenPage(HttpServletRequest request, Model model, HttpSession httpSession) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return "redirect:/auth/sign-in";
-        }
-
-        String login = (String) session.getAttribute("login");
+    public String mainScreenPage(Model model, HttpSession httpSession) {
+        String login = (String) httpSession.getAttribute("login");
         Integer userId = (Integer) httpSession.getAttribute("id");
-        if (userId == null) {
-            return "redirect:/auth/sign-in";
-        }
 
         model.addAttribute("login", login);
 

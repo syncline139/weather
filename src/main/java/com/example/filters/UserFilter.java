@@ -31,10 +31,7 @@ public class UserFilter implements Filter {
      * @throws ServletException в случае ошибки сервлета
      */
     @Override
-    public void doFilter(ServletRequest servletRequest,
-                         ServletResponse servletResponse,
-                         FilterChain filterChain) throws IOException, ServletException {
-
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
@@ -45,16 +42,23 @@ public class UserFilter implements Filter {
             return;
         }
 
-
         Cookie[] cookies = request.getCookies();
         boolean authenticatedValid = false;
+        String sessionId = null;
+
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if ("SESSIONID".equals(c.getName())) {
-                    String sessionId = c.getValue();
+                    sessionId = c.getValue();
                     if (authDao.findByUUID(sessionId)) {
                         authenticatedValid = true;
                         break;
+                    } else {
+                        // Если сессия невалидна, удаляем куку
+                        Cookie cookie = new Cookie("SESSIONID", null);
+                        cookie.setPath("/");
+                        cookie.setMaxAge(0);
+                        response.addCookie(cookie);
                     }
                 }
             }
@@ -65,7 +69,7 @@ public class UserFilter implements Filter {
             return;
         }
 
-        if (authenticatedValid && (path.equals("/"))) {
+        if (authenticatedValid && path.equals("/")) {
             response.sendRedirect(request.getContextPath() + "/weather");
             return;
         }
