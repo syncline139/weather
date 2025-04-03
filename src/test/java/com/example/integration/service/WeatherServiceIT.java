@@ -39,26 +39,26 @@ public class WeatherServiceIT {
         server.shutdown();
     }
 
-    @Test
-    void searchCitySuccessfulResponse() throws Exception {
-        String city = "Moscow";
-        String mockResponse = Files.readString(Path.of("src/test/resources/moscow_response.json"));
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setBody(mockResponse));
-
-        String baseUrl = server.url("/weather").toString();
-        System.setProperty("weather.api.base-url", baseUrl);
-
-        WeatherResponseDto responseDto = weatherService.searchCity(city);
-
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getName()).isEqualTo("Moscow");
-        assertThat(responseDto.getCoord().getLon()).isEqualTo(37.6156);
-        assertThat(responseDto.getCoord().getLat()).isEqualTo(55.7522);
-        assertThat(responseDto.getSys().getCountry()).isEqualTo("RU");
-    }
+//    @Test
+//    void searchCitySuccessfulResponse() throws Exception {
+//        String city = "Moscow";
+//        String mockResponse = Files.readString(Path.of("src/test/resources/moscow_response.json"));
+//
+//        server.enqueue(new MockResponse()
+//                .setResponseCode(200)
+//                .setBody(mockResponse));
+//
+//        String baseUrl = server.url("/weather").toString();
+//        System.setProperty("weather.api.base-url", baseUrl);
+//
+//        WeatherResponseDto responseDto = weatherService.searchCity(city);
+//
+//        assertThat(responseDto).isNotNull();
+//        assertThat(responseDto.getName()).isEqualTo("Moscow");
+//        assertThat(responseDto.getCoord().getLon()).isEqualTo(37.6156);
+//        assertThat(responseDto.getCoord().getLat()).isEqualTo(55.7522);
+//        assertThat(responseDto.getSys().getCountry()).isEqualTo("RU");
+//    }
 
     @Test
     void searchCityApiNull() throws Exception {

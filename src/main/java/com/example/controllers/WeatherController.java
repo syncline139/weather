@@ -79,84 +79,97 @@ public class WeatherController {
         return "redirect:/weather";
     }
 
-    /**
-     * Выполняет поиск города по названию и назначает уникальный ключ каждой найденной локации пользователя.
-     * Результат поиска сохраняется в HashMap с уникальным ключом как ключом и данными о погоде как значением.
-     * Ключ и дополнительные данные о городе передаются на фронтенд для отображения.
-     *
-     * @param nameCity           название города, введенное пользователем и полученное из формы
-     * @param request            объект HttpServletRequest для доступа к данным сессии
-     * @param redirectAttributes объект RedirectAttributes для передачи всплывающих атрибутов при редиректе
-     * @param session            объект HttpSession для хранения ожидающих локаций с уникальными ключами
-     * @return имя представления ("pages/search-results") для отображения результатов поиска
-     * @throws IllegalArgumentException если город не найден или входные данные недействительны
-     */
+
     @PostMapping("/search-results")
     public String search(@RequestParam("nameCity") String nameCity,
                          Model model,
                          HttpServletRequest request,
                          RedirectAttributes redirectAttributes,
                          HttpSession session) {
-
         if (nameCity == null || nameCity.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Город не может быть пустым");
             return "redirect:/weather";
         }
 
         HttpSession sessionFalse = request.getSession(false);
-
-        if (sessionFalse != null) {
-            String login = (String) sessionFalse.getAttribute("login");
-            model.addAttribute("login", login);
+        if (sessionFalse == null) {
+            return "redirect:/auth/sign-in";
         }
+
+        String login = (String) sessionFalse.getAttribute("login");
+        Integer userId = (Integer) sessionFalse.getAttribute("id");
+        if (userId == null) {
+            return "redirect:/auth/sign-in";
+        }
+        model.addAttribute("login", login);
 
         WeatherResponseDto search = weatherService.searchCity(nameCity);
-
-        if (search == null) {
-            throw new IllegalArgumentException("Не удалось найти город");
-        }
-
-        // уникальность попадания в БД
-        if (locationDao.uniqueLocationDate(search.getCoord().getLat(), search.getCoord().getLon(), (Integer) session.getAttribute("id"))) {
-            redirectAttributes.addFlashAttribute("successfulMessage", "Вы уже добавли этот город");
+        if (search == null || search.getList() == null || search.getList().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Не удалось найти города");
             return "redirect:/weather";
         }
 
-        String locationKey = UUID.randomUUID().toString(); // ключ для каждоый локации
-        Map<String, WeatherResponseDto> pendingLocations = (Map<String, WeatherResponseDto>) session.getAttribute("pendingLocations");
+        // Подготовка списка городов с уникальными ключами
+        Map<String, WeatherResponseDto.WeatherItem> pendingLocations = (Map<String, WeatherResponseDto.WeatherItem>) session.getAttribute("pendingLocations");
         if (pendingLocations == null) {
             pendingLocations = new HashMap<>();
             session.setAttribute("pendingLocations", pendingLocations);
         }
 
-        pendingLocations.put(locationKey, search);
-        model.addAttribute("locationKey", locationKey);
-        model.addAttribute("nameCity", search.getName());
-        model.addAttribute("coord", search.getCoord());
-        model.addAttribute("sys", search.getSys());
+        List<Map<String, Object>> cities = new ArrayList<>();
+        for (WeatherResponseDto.WeatherItem city : search.getList()) {
+            // Проверка уникальности для каждого города
+            if (!locationDao.uniqueLocationDate(city.getCoord().getLat(), city.getCoord().getLon(), userId)) {
+                String locationKey = UUID.randomUUID().toString();
+                pendingLocations.put(locationKey, city);
+                Map<String, Object> cityData = new HashMap<>();
+                cityData.put("locationKey", locationKey);
+                cityData.put("name", city.getName());
+                cityData.put("country", city.getSys().getCountry());
+                cityData.put("coord", city.getCoord());
+                cities.add(cityData);
+            }
+        }
 
+        if (cities.isEmpty()) {
+            redirectAttributes.addFlashAttribute("successfulMessage", "Все найденные города уже добавлены");
+            return "redirect:/weather";
+        }
+
+        model.addAttribute("cities", cities);
         return "pages/search-results";
     }
 
     @PostMapping("/add-location")
     public String addLocation(@RequestParam("locationKey") String locationKey,
-                              HttpSession session) {
-
-        Map<String, WeatherResponseDto> pendingLocations = (Map<String, WeatherResponseDto>) session.getAttribute("pendingLocations");
-        if (pendingLocations != null) {
-            WeatherResponseDto responseDto = pendingLocations.get(locationKey);
-            if (responseDto != null) {
-                Integer id = (Integer) session.getAttribute("id"); // получаем id который был сохранен при аутентификации пользователя
-                locationService.saveLocation(
-                        id,
-                        responseDto.getName(),
-                        responseDto.getCoord().getLat(),
-                        responseDto.getCoord().getLon()
-                );
-                pendingLocations.remove(locationKey); // сразу же удаляем из hashmap данные о локации после добавляение ее в БД
-            }
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        Map<String, WeatherResponseDto.WeatherItem> pendingLocations = (Map<String, WeatherResponseDto.WeatherItem>) session.getAttribute("pendingLocations");
+        if (pendingLocations == null || pendingLocations.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Локация не найдена в ожидающих");
+            return "redirect:/weather";
         }
 
+        WeatherResponseDto.WeatherItem selectedCity = pendingLocations.get(locationKey);
+        if (selectedCity == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Выбранная локация не найдена");
+            return "redirect:/weather";
+        }
+
+        Integer userId = (Integer) session.getAttribute("id");
+        if (userId == null) {
+            return "redirect:/auth/sign-in";
+        }
+
+        locationService.saveLocation(
+                userId,
+                selectedCity.getName(),
+                selectedCity.getCoord().getLat(),
+                selectedCity.getCoord().getLon()
+        );
+        pendingLocations.remove(locationKey);
+
+        redirectAttributes.addFlashAttribute("successfulMessage", "Локация успешно добавлена");
         return "redirect:/weather";
     }
 

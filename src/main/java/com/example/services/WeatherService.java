@@ -29,7 +29,7 @@ public class WeatherService {
             throw new IllegalStateException("API ключ не корректный");
         }
         String encoderCity = URLEncoder.encode(nameCity, StandardCharsets.UTF_8.toString());
-        var url = "https://api.openweathermap.org/data/2.5/weather?q=" + encoderCity + "&appid=" + API;
+        var url = "https://api.openweathermap.org/data/2.5/find?q=" + encoderCity + "&appid=" + API;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
