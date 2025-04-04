@@ -4,9 +4,11 @@ import com.example.dao.LocationDao;
 import com.example.dto.response.WeatherCardDto;
 import com.example.dto.response.LocationResponseDto;
 import com.example.dto.response.WeatherResponseDto;
+import com.example.exceptions.GlobalExceptionHandler;
 import com.example.models.Locations;
 import com.example.services.LocationService;
 import com.example.services.WeatherService;
+import com.example.utils.WeatherCondition;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class WeatherController {
      *
      * @return возвращаем основную страницу с карточками
      */
+
     @GetMapping
     public String mainScreenPage(Model model, HttpSession httpSession) {
         String login = (String) httpSession.getAttribute("login");
@@ -51,7 +54,19 @@ public class WeatherController {
             double lon = location.getLongitude();
             try {
                 LocationResponseDto weather = locationService.searchWeather(lat, lon);
-                weatherCards.add(new WeatherCardDto(location.getId(), location.getName(), weather));
+
+                String translatedMain = weather.getWeather() != null && !weather.getWeather().isEmpty()
+                        ? WeatherCondition.translate(weather.getWeather().get(0).getMain())
+                        : "Неизвестно";
+                // Создаем новый объект с переведённым значением
+                LocationResponseDto translatedWeather = new LocationResponseDto(
+                        weather.getName(),
+                        weather.getWeather(),
+                        weather.getMain(),
+                        weather.getSys()
+                );
+                translatedWeather.getWeather().get(0).setMain(translatedMain);
+                weatherCards.add(new WeatherCardDto(location.getId(), location.getName(), translatedWeather));
             } catch (Exception e) {
                 System.err.println("Ошибка получения погоды для " + location.getName() + ": " + e.getMessage());
             }
@@ -101,8 +116,7 @@ public class WeatherController {
 
         WeatherResponseDto search = weatherService.searchCity(nameCity);
         if (search == null || search.getList() == null || search.getList().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Не удалось найти города");
-            return "redirect:/weather";
+            throw new IllegalStateException();
         }
 
         // Подготовка списка городов с уникальными ключами
