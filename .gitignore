@@ -13,8 +13,7 @@ target/
 .idea/
 *.iml
 *.iws
-hibernate.properties
-application-test.properties
+.env
 *.ipr
 out/
 todo

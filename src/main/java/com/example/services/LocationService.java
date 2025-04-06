@@ -32,7 +32,7 @@ public class LocationService {
     private final LocationDao locationDao;
     private final AuthDao authDao;
 
-    @Value("${API}")
+    @Value("${OPENWEATHER_API_KEY}")
     private String API;
 
     public void saveLocation(Integer id, String city, double lat, double lon) {

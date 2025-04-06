@@ -22,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.sql.DataSource;
 import java.util.Objects;
@@ -30,13 +31,22 @@ import java.util.Properties;
 @Configuration
 @ComponentScan("com.example")
 @EnableWebMvc
-@PropertySource("classpath:hibernate.properties")
+@PropertySource("classpath:application-docker.properties")
 @EnableTransactionManagement
 @RequiredArgsConstructor
 public class SpringConfig implements WebMvcConfigurer {
 
     private final ApplicationContext applicationContext;
     private final Environment environment;
+
+    @Value("${DB_URL}")
+    private String dbUrl;
+
+    @Value("${DB_USERNAME}")
+    private String dbUsername;
+
+    @Value("${DB_PASSWORD}")
+    private String dbPassword;
 
     @Bean
     public SpringResourceTemplateResolver templateResolver() {
@@ -69,11 +79,10 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        dataSource.setDriverClassName(Objects.requireNonNull(environment.getRequiredProperty("hibernate.driver_class")));
-        dataSource.setUrl(environment.getRequiredProperty("hibernate.connection.url"));
-        dataSource.setUsername(environment.getRequiredProperty("hibernate.connection.username"));
-        dataSource.setPassword(environment.getRequiredProperty("hibernate.connection.password"));
+        dataSource.setDriverClassName("org.postgresql.Driver");
+        dataSource.setUrl(dbUrl);
+        dataSource.setUsername(dbUsername);
+        dataSource.setPassword(dbPassword);
         return dataSource;
     }
 

@@ -19,8 +19,10 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class WeatherService {
 
-    @Value("${API}")
+    @Value("${OPENWEATHER_API_KEY}")
     private String API;
+
+
 
 
     @SneakyThrows
