@@ -79,7 +79,7 @@
 - Поиск локаций
 - Выход из аккаунта
 
-![img_2.png](src/main/resources/view/static/images/weather.png)
+![weather](src/main/resources/view/static/images/weather.png)
 
 ### Страница поиска локаций
 
@@ -88,7 +88,7 @@
 - Поиск локаций
 - Добавление локаций на главную страницу
 
-![img_1.png](src/main/resources/view/static/images/city.png)
+![city](src/main/resources/view/static/images/city.png)
 
 
 <hr/>
