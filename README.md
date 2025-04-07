@@ -9,7 +9,7 @@
 после чего главная страница приложения начинает отображать список локаций с
 их текущей погодой.
 
-### Деплой: http://37.252.19.242:8081
+### Деплой: http://37.252.19.242:8081 (пока не работает)
 
 # Использованные технологии / инструменты
 <hr/>
@@ -35,13 +35,18 @@
 ![css-logo](https://github.com/VladislavLevchikIsAProger/tennis_scoreboard/assets/153897612/d7d9ecf6-1cfb-4fe1-ba32-dd43d59921a8)
 ![thymeleaf](https://github.com/VladislavLevchikIsAProger/weather_tracker/assets/153897612/5c5cda5f-c5d6-42c8-893b-3737e8d04db2)
 
+### Deploy
+
+![dockerfile](https://github.com/VladislavLevchikIsAProger/weather_tracker/assets/153897612/e22a80da-ca5a-438b-a5f5-605393f3208d)
+![docker-compose](https://github.com/VladislavLevchikIsAProger/weather_tracker/assets/153897612/82390fb8-e6d4-4b15-b175-78eead5bc360)
+
 ## Диаграмма базы данных
 
 ![diagram](https://github.com/VladislavLevchikIsAProger/weather_tracker/assets/153897612/06eab789-15ed-4dd5-b29a-70d48b3fd80a)
 
 
 ## Зависимости
-+ Java 21+
++ Java 21
 + Apache Maven
 + Tomcat 11
 + Intellij IDEA
@@ -56,14 +61,14 @@
 - Регистрация пользователя по уникальному логику и паролю
 - Подтверждение пароля для успешной регистрации
 
-![img.png](src/main/resources/view/static/images/img.png)
+![authorization.png](src/main/resources/view/static/images/registration.png)
 
 ### Авторизации
 
 Адрес - `/auth/sign-in`
 - Авторизация пользователя по существующему логину и паролю
 
-  ![img_1.png](src/main/resources/view/static/images/img_1.png)
+![authorization.png](src/main/resources/view/static/images/authorization.png)
 
 
 ### Главная страница
@@ -74,7 +79,7 @@
 - Поиск локаций
 - Выход из аккаунта
 
-![img_2.png](src/main/resources/view/static/images/img_2.png)
+![img_2.png](src/main/resources/view/static/images/weather.png)
 
 ### Страница поиска локаций
 
@@ -83,89 +88,99 @@
 - Поиск локаций
 - Добавление локаций на главную страницу
 
-![img_3.png](src/main/resources/view/static/images/img_3.png)
+![img_1.png](src/main/resources/view/static/images/city.png)
 
 
 <hr/>
 
-## Установка проекта
+## Установка и запуск через Docker
 
-Следуйте этим шагам, чтобы настроить и запустить проект на своей машине:
+### 1. Клонирование репозитория
+- Перейдите в папку, где хотите хранить проект.
+- Откройте консоль и выполните команды:
+  ```bash
+  git clone https://github.com/0-Luntik-0/weather.git
+  cd weather
+  ```
 
-### 1. Клонирование репозитория:
+### 2. Настройка файла `.env`
 
-   Откройте терминал и выполните команду:
+- API вы можете взять на сайте -> [openweathermap](https://openweathermap.org/api)
+- Для этого придеться зарегестрироваться и получить API ключ (лимит 60 запросов в минуту)
 
- `git clone https://github.com/0-Luntik-0/weather.git`
+<hr/>
 
-  `cd ВАША-ПАПКА`
-### 2. Настройка PostgreSQL
+- Переименуйте файл `.env.example` в `.env` и заполните своими данными:
+- 
+  ```properties
+  # Database
+  DB_NAME=your_db_name
+  DB_USERNAME=your_user
+  DB_PASSWORD=your_password
 
-1. Установите PostgreSQL, если он ещё не установлен, и запустите сервер.
-2. Создайте базу данных: 
+  # OpenWeather
+  OPENWEATHER_API_KEY=your_api_key
+  ```
 
-```properties
-CREATE DATABASE project_weather
+### 3. Подготовка к запуску приложения
+- Убедитесь, что установлены Docker и Docker Compose. Проверьте версии:
+  ```bash
+  docker --version
+  docker compose version
+  ```
+- Если вывод примерно такой:
+  ```bash
+  Docker version 28.0.4, build b8034c0
+  Docker Compose version v2.34.0
+  ```
+  переходите к следующему шагу. Иначе установите Docker и Docker Compose.
+
+### Для Windows и macOS:
+
+- Скачайте и установите Docker Desktop с [официального сайта Docker](https://www.docker.com/products/docker-desktop)
+- Запустите Docker Desktop и дождитесь его полной загрузки.
+- Проверьте установку в терминале:
+
+```bash
+docker --version
+docker compose version
 ```
 
-3. Переименуйте файл src/main/resources/hibernate.properties.origin в hibernate.properties и укажите свои данные для подключения к PostgreSQL: 
+### Для Linux:
+- Установите Docker [по официальной документации](https://docs.docker.com/engine/install/)
+- Установите Docker Compose [по официальной документации](https://docs.docker.com/desktop/setup/install/linux/)
+- Проверьте установку в терминале:
 
-```properties
-hibernate.driver_class=org.postgresql.Driver
-hibernate.connection.url=jdbc:postgresql://localhost:5432/project_weather
-hibernate.connection.username=YOUR_USERNAME
-hibernate.connection.password=YOUR_PASSWORD
-
-hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-hibernate.show_sql=true
-
-API=YOUR_API_KEY
+```bash
+docker --version
+docker compose version
 ```
-### Сборка и запуск приложения на Tomcat
+### 4. Запуск приложения
+- В папке проекта выполните:
+  ```bash
+  docker compose up --build
+  ```
 
-1. **Перейдите в директорию проекта:**
-   ```bash
-   cd ВАША_ПАПКА
-   ```
+### 5. Доступ к приложению
+- Откройте браузер и перейдите по адресу:
+  ```
+  http://localhost:8080
+  ```
 
-2. **Соберите проект и установите зависимости:**
-   ```bash
-   mvn clean install
-   ```
+### Остановка и очистка
+- Чтобы остановить контейнеры и удалить данные:
+  ```bash
+  docker compose down -v
+  ```
 
-3. **Развертывание на Tomcat**
-
-   **Если используете внешний Tomcat:**
-
-    - Найдите сгенерированный WAR-файл (обычно находится в `target/ВАШ_ПРОЕКТ.war`).
-    - Скопируйте WAR-файл в папку `webapps` вашего Tomcat:
-      ```bash
-      cp target/ВАШ_ПРОЕКТ.war /путь_к_Tomcat/webapps/
-      ```
-    - Запустите Tomcat:
-      ```bash
-      cd /путь_к_Tomcat/bin
-      ./startup.sh   # для Linux/macOS
-      startup.bat    # для Windows
-      ```
-    - Перейдите в браузере по адресу:
-      ```
-      http://localhost:8080/
-      ```
-
-4. **Запуск в IntelliJ IDEA**
-
-    - Откройте проект в IntelliJ IDEA.
-    - Перейдите в **Run | Edit Configurations**.
-    - Нажмите `+` и выберите **Tomcat Server | Local**.
-    - Укажите путь к установленному Tomcat.
-    - В разделе **Deployment** нажмите `+` и добавьте ваш WAR-файл.
-    - Убедитесь, что Tomcat настроен на порт `8080`.
-    - Нажмите **Apply** и **OK**.
-    - Запустите конфигурацию с помощью **Run** или **Debug**.
-    - Откройте в браузере:
-      ```
-      http://localhost:8080/
-      ```
-
-
+### Что внутри Docker?
+- **PostgreSQL**:
+  - Данные в томе `postgres_data`.
+  - Порт: `5433` (хост) → `5432` (контейнер).
+- **Adminer**:
+  - Веб-интерфейс для БД.
+  - Доступ: `http://localhost:5050` (логин/пароль из `.env`).
+- **Приложение**:
+  - Собирается из `Dockerfile`.
+  - Порт: `8080` (хост) → `8080` (контейнер).
+  - Подключается к БД через сеть Docker.
