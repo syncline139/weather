@@ -25,12 +25,6 @@ public class UserFilter implements Filter {
      * -> Проверяет наличие cookie с именем "SESSIONID" и валидирует сессию
      * -> Не дает юзеру зайти на страницу регестрации или авторизации если тот аутентифицирован
      * -> Не дает юзера зайти на на страници пока тот не аутентифицирован
-     *
-     * @param servletRequest  запрос
-     * @param servletResponse ответ
-     * @param filterChain     цепочка фильтров через которую передается запрос
-     * @throws IOException      в случае ошибки ввода/вывода
-     * @throws ServletException в случае ошибки сервлета
      */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {

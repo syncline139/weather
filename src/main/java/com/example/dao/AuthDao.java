@@ -71,14 +71,10 @@ public class AuthDao {
     }
 
     public void removeAllExpiresatElseOverdueTime() {
-        Session currentSession = sessionFactory.getCurrentSession();
-        List<Sessions> expiresAt = currentSession.createQuery("from Sessions", Sessions.class)
-                .getResultList();
-        for (Sessions s : expiresAt) {
-            if (s.getExpiresAt().isBefore(LocalDateTime.now())) {
-                currentSession.remove(s);
-            }
-        }
+        sessionFactory.getCurrentSession()
+                .createQuery("DELETE FROM Sessions s WHERE s.expiresAt < :now")
+                .setParameter("now", LocalDateTime.now())
+                .executeUpdate();
     }
 
     public List<Sessions> findAllSession() {

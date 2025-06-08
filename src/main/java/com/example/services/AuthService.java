@@ -11,12 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,7 +29,7 @@ public class AuthService {
     // нужен для того что бы пока приложение останавливается, операция не выполнялась
     private volatile boolean isShuttingDown = false;
 
-    public void save(Users user) {
+    public void create(Users user) {
             String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
             user.setPassword(hashedPassword);
             authDao.saveUser(user);

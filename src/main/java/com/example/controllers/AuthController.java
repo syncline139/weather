@@ -43,7 +43,7 @@ public class AuthController {
             return "auth/sign-up";
         }
 
-        authService.save(user);
+        authService.create(user);
         return "auth/sign-in";
     }
 

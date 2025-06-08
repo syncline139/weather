@@ -32,6 +32,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LocationService {
 
+    public static final String WEATHER_API_URL_TEMPLATE = "https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s";
     private final LocationDao locationDao;
     private final AuthDao authDao;
 
@@ -54,7 +55,7 @@ public class LocationService {
             throw new IllegalStateException("API ключ не корректный");
         }
 
-        var url = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s", lat, lon, API);
+        var url = String.format(WEATHER_API_URL_TEMPLATE, lat, lon, API);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -78,18 +79,18 @@ public class LocationService {
             double lat = location.getLatitude();
             double lon = location.getLongitude();
             try {
-                LocationResponseDto weather = searchWeather(lat, lon);
-                String translatedMain = weather.getWeather() != null && !weather.getWeather().isEmpty()
-                        ? WeatherCondition.translate(weather.getWeather().get(0).getMain())
+                LocationResponseDto weatherResponse = searchWeather(lat, lon);
+                String translatedMain = weatherResponse.getWeather() != null && !weatherResponse.getWeather().isEmpty()
+                        ? WeatherCondition.translate(weatherResponse.getWeather().getFirst().getMain())
                         : "Неизвестно";
                 // Создаем новый объект с переведённым значением
                 LocationResponseDto translatedWeather = new LocationResponseDto(
-                        weather.getName(),
-                        weather.getWeather(),
-                        weather.getMain(),
-                        weather.getSys()
+                        weatherResponse.getName(),
+                        weatherResponse.getWeather(),
+                        weatherResponse.getMain(),
+                        weatherResponse.getSys()
                 );
-                translatedWeather.getWeather().get(0).setMain(translatedMain);
+                translatedWeather.getWeather().getFirst().setMain(translatedMain);
                 weatherCards.add(new WeatherCardDto(location.getId(), location.getName(), translatedWeather));
             } catch (Exception e) {
                 log.error("Ошибка получения погоды для {}: {}", location.getName(), e.getMessage());

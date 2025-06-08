@@ -27,7 +27,6 @@ public enum WeatherCondition {
         return russianName;
     }
 
-    // Метод для поиска по английскому названию
     public static WeatherCondition fromEnglishName(String englishName) {
         if (englishName == null) {
             return null;
@@ -40,7 +39,6 @@ public enum WeatherCondition {
         return null;
     }
 
-    // Метод для получения русского названия с fallback на английское
     public static String translate(String englishName) {
         WeatherCondition condition = fromEnglishName(englishName);
         return condition != null ? condition.russianName : englishName;
