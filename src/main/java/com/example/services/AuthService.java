@@ -11,89 +11,55 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * В данном классе содержиться бизнес-логика относящиеся к аунтентификации
- */
 @Service
 @EnableScheduling
 @RequiredArgsConstructor
 public class AuthService {
 
+    public static final int TIME_LIVE_SESSION = 86400;
+    public static final String SESSION = "SESSIONID";
     private final AuthDao authDao;
 
     // нужен для того что бы пока приложение останавливается, операция не выполнялась
     private volatile boolean isShuttingDown = false;
 
-    /**
-     * Проверяем схожеться паролей и уникальность логина, а так же полсле все проверок хешируем пароль
-     *
-     * @param user передаем человека которого мы сохраним если пройдем провреки
-     */
     public void save(Users user) {
-
-        String login = user.getLogin();
-
-        if (user.getPassword() != null &&
-                user.getPassword().equals(user.getConfirmPassword()) &&
-                authDao.uniqueLogin(login)) {
-
             String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
             user.setPassword(hashedPassword);
-
             authDao.saveUser(user);
-        }
     }
 
-    /**
-     * Отвечает за создание создание сесии для юзера который отправляеться в БД
-     * Далее создаеться токен который извлекаеться из UUID в виде строки и называеться он 'SESSIONID'
-     * Затем мы его добавляем в объект ответа который отправляеться клиенту
-     *
-     * @param user     привязываем переданного юзера к сессии
-     * @param response добаляем куки с индификатором сесии
-     */
-
     public void createSession(Users user, HttpServletResponse response) {
-
         if (user == null) {
-            throw new IllegalArgumentException("user не может быть null ( AuthServices/createSession");
+            throw new IllegalArgumentException("user не может быть null");
         }
 
         Sessions sessions = new Sessions();
         sessions.setUser(user);
         sessions.setExpiresAt(LocalDateTime.now().plusDays(1));
-
         authDao.saveSession(sessions);
-
         String token = sessions.getId().toString();
 
-
-        Cookie cookie = new Cookie("SESSIONID", token);
+        Cookie cookie = new Cookie(SESSION, token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(86400); // 24 часа
+        cookie.setMaxAge(TIME_LIVE_SESSION);
         response.addCookie(cookie);
-
-
     }
 
-    /**
-     * Ищем сессию в Бд и удаляем ее и так же анулируем сессиию у юзера посылая ему новые куки
-     *
-     * @param request  принимаем куки активного пользователя
-     * @param response посылаем новые куки пользотваля
-     */
     public void exit(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
-                if ("SESSIONID".equals(c.getName())) { // SESSIONID -> название наших куков
+                if (SESSION.equals(c.getName())) {
                     String sessionIdStr = c.getValue();
                     if (authDao.findByUUID(sessionIdStr)) {
                         UUID uuid;
@@ -106,31 +72,28 @@ public class AuthService {
                         Sessions session = authDao.findSessionByUUID(uuid);
                         if (session != null) {
                             authDao.deleteSession(session);
-                            Cookie cookie = new Cookie("SESSIONID", null);
+                            Cookie cookie = new Cookie(SESSION, null);
                             cookie.setPath("/");
                             cookie.setMaxAge(0);
                             response.addCookie(cookie);
                             request.getSession().invalidate();
                         } else {
-                            throw new IllegalArgumentException("Сессия не должна быть null AuthServices/exit");
+                            throw new IllegalArgumentException("Сессия не должна быть null");
                         }
                     } else {
-                        throw new IllegalArgumentException("UUID не найдено в БД AuthServices/exit");
+                        throw new IllegalArgumentException("UUID не найдено в БД");
                     }
                 }
             }
         } else {
-            throw new IllegalArgumentException("куки не должны быть null AuthServices/exit");
+            throw new IllegalArgumentException("куки не должны быть null");
         }
     }
 
 
-    /**
-     * Каждый час выполняется проверка на просроченные UUID
-     */
     @Scheduled(fixedRate = 3600 * 1000) // каждый час
     public void sessionClear() {
-        if (!isShuttingDown) { // Проверяем флаг
+        if (!isShuttingDown) {
             authDao.removeAllExpiresatElseOverdueTime();
         }
     }
@@ -139,30 +102,28 @@ public class AuthService {
         this.isShuttingDown = shuttingDown; // Устанавливаем флаг
     }
 
-    /**
-     * Метод регулярно (каждый час ) проверяет все активные сессии.
-     * Если до истечения сессии осталось менее 3 часов, то считается
-     * что пользователь был активен недавно и сессия продлевается на один день от текущего момента
-     */
-    @Scheduled(fixedRate = 3600 * 1000) // каждый час
-
+    @Scheduled(fixedRate = 3600 * 1000)
     public void extendSessions() {
-
         List<Sessions> sessionsList = authDao.findAllSession();
         LocalDateTime now = LocalDateTime.now();
-        long fifteenMinutesMillis = 180 * 60 * 1000L; // 3 часа
+        long fifteenMinutesMillis = 180 * 60 * 1000L;
 
         for (Sessions session : sessionsList) {
             long remainingMillis = Duration.between(now, session.getExpiresAt()).toMillis();
             if (remainingMillis < fifteenMinutesMillis) {
-                // Продлеваем сессию на 1 день от текущего момента
                 session.setExpiresAt(now.plusDays(1));
                 authDao.saveSession(session);
             }
         }
     }
 
+    public boolean uniqueLogin(String login) {
+        return authDao.uniqueLogin(login);
+    }
 
+    public Users findByLogin(String login) {
+       return authDao.findByLogin(login);
+    }
 }
 
 

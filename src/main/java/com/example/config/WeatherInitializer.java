@@ -10,16 +10,18 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 
 public class WeatherInitializer implements WebApplicationInitializer {
 
+    public static final String USER_FILTER = "userFilter";
+
     @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
+    public void onStartup(ServletContext servletContext){
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         context.register(com.example.config.SpringConfig.class);
 
         servletContext.addListener(new ContextLoaderListener(context));
-        servletContext.addListener(new AppStartupListener());  // включаем в жизненный цикл наш очиститель сессий
+        servletContext.addListener(new AppStartupListener());  // включаем в жизненный цикл очиститель сессий
 
-        FilterRegistration.Dynamic userFilter = servletContext.addFilter("userFilter",
-                new DelegatingFilterProxy("userFilter"));
+        FilterRegistration.Dynamic userFilter = servletContext.addFilter(USER_FILTER,
+                new DelegatingFilterProxy(USER_FILTER));
         userFilter.addMappingForUrlPatterns(null, false, "/*");
     }
 }

@@ -2,7 +2,6 @@ package com.example.config;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -12,7 +11,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -25,27 +23,30 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.sql.DataSource;
-import java.util.Objects;
 import java.util.Properties;
 
 @Configuration
 @ComponentScan("com.example")
 @EnableWebMvc
-@PropertySource("classpath:application-docker.properties")
+@PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 @RequiredArgsConstructor
 public class SpringConfig implements WebMvcConfigurer {
 
+    private static final String HIBERNATE_DIALECT = "hibernate.dialect";
+    private static final String HIBERNATE_SHOW_SQL = "hibernate.show_sql";
+    private static final String TEMPLATE_ENCODING = "UTF-8";
+
     private final ApplicationContext applicationContext;
     private final Environment environment;
 
-    @Value("${DB_URL}")
+    @Value("${db.url}")
     private String dbUrl;
 
-    @Value("${DB_USERNAME}")
+    @Value("${db.username}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD}")
+    @Value("${db.password}")
     private String dbPassword;
 
     @Bean
@@ -55,7 +56,7 @@ public class SpringConfig implements WebMvcConfigurer {
         templateResolver.setPrefix("classpath:/view/templates/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
-        templateResolver.setCharacterEncoding("UTF-8");
+        templateResolver.setCharacterEncoding(TEMPLATE_ENCODING);
         return templateResolver;
     }
 
@@ -72,7 +73,7 @@ public class SpringConfig implements WebMvcConfigurer {
     public void configureViewResolvers(ViewResolverRegistry registry) {
         ThymeleafViewResolver resolver = new ThymeleafViewResolver();
         resolver.setTemplateEngine(templateEngine());
-        resolver.setCharacterEncoding("UTF-8");
+        resolver.setCharacterEncoding(TEMPLATE_ENCODING);
         registry.viewResolver(resolver);
     }
 
@@ -88,8 +89,8 @@ public class SpringConfig implements WebMvcConfigurer {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.put("hibernate.dialect", environment.getRequiredProperty("hibernate.dialect"));
-        properties.put("hibernate.show_sql", environment.getRequiredProperty("hibernate.show_sql"));
+        properties.put(HIBERNATE_DIALECT, environment.getRequiredProperty(HIBERNATE_DIALECT));
+        properties.put(HIBERNATE_SHOW_SQL, environment.getRequiredProperty(HIBERNATE_SHOW_SQL));
 
         return properties;
     }
