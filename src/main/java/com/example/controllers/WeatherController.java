@@ -38,25 +38,18 @@ public class WeatherController {
         model.addAttribute("login", login);
 
         List<WeatherCardDto> weatherCards = locationService.findLocationData(userId);
-
         model.addAttribute("weatherCards", weatherCards);
         return "pages/index";
     }
-
 
     @DeleteMapping("/delete-card/{id}")
     public String deleteCard(@PathVariable("id") int locationId, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("id");
         if (userId != null) {
-            List<Locations> locations = locationDao.findLocationsByUserId(userId);
-            if (locations.stream().anyMatch(location -> location.getId() == locationId)) {
-                locationDao.deleteLocationById(locationId);
-            }
+            locationService.deleteCard(userId, locationId);
         }
-
         return "redirect:/weather";
     }
-
 
     @PostMapping("/search-results")
     public String search(@RequestParam("nameCity") String nameCity,
@@ -86,27 +79,7 @@ public class WeatherController {
             throw new IllegalStateException();
         }
 
-        // Подготовка списка городов с уникальными ключами
-        Map<String, WeatherResponseDto.WeatherItem> pendingLocations = (Map<String, WeatherResponseDto.WeatherItem>) session.getAttribute("pendingLocations");
-        if (pendingLocations == null) {
-            pendingLocations = new HashMap<>();
-            session.setAttribute("pendingLocations", pendingLocations);
-        }
-
-        List<Map<String, Object>> cities = new ArrayList<>();
-        for (WeatherResponseDto.WeatherItem city : search.getList()) {
-            // Проверка уникальности для каждого города
-            if (!locationDao.uniqueLocationDate(city.getCoord().getLat(), city.getCoord().getLon(), userId)) {
-                String locationKey = UUID.randomUUID().toString();
-                pendingLocations.put(locationKey, city);
-                Map<String, Object> cityData = new HashMap<>();
-                cityData.put("locationKey", locationKey);
-                cityData.put("name", city.getName());
-                cityData.put("country", city.getSys().getCountry());
-                cityData.put("coord", city.getCoord());
-                cities.add(cityData);
-            }
-        }
+        List<Map<String, Object>> cities = locationService.searchCities(session, userId, search);
 
         if (cities.isEmpty()) {
             redirectAttributes.addFlashAttribute("successfulMessage", "Все найденные города уже добавлены");

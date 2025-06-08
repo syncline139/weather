@@ -4,11 +4,15 @@ import com.example.dao.AuthDao;
 import com.example.dao.LocationDao;
 import com.example.dto.response.LocationResponseDto;
 import com.example.dto.response.WeatherCardDto;
+import com.example.dto.response.WeatherResponseDto;
 import com.example.models.Locations;
+import com.example.models.Sessions;
 import com.example.models.Users;
 import com.example.utils.WeatherCondition;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +21,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -89,5 +92,37 @@ public class LocationService {
             }
         }
         return weatherCards;
+    }
+
+    public void deleteCard(int userId,int locationId ) {
+        List<Locations> locations = locationDao.findLocationsByUserId(userId);
+        if (locations.stream().anyMatch(location -> location.getId() == locationId)) {
+            locationDao.deleteLocationById(locationId);
+        }
+    }
+
+    public List<Map<String, Object>> searchCities(HttpSession session, int userId, WeatherResponseDto search ) {
+        // Подготовка списка городов с уникальными ключами
+        Map<String, WeatherResponseDto.WeatherItem> pendingLocations = (Map<String, WeatherResponseDto.WeatherItem>) session.getAttribute("pendingLocations");
+        if (pendingLocations == null) {
+            pendingLocations = new HashMap<>();
+            session.setAttribute("pendingLocations", pendingLocations);
+        }
+
+        List<Map<String, Object>> cities = new ArrayList<>();
+        for (WeatherResponseDto.WeatherItem city : search.getList()) {
+            // Проверка уникальности для каждого города
+            if (!locationDao.uniqueLocationDate(city.getCoord().getLat(), city.getCoord().getLon(), userId)) {
+                String locationKey = UUID.randomUUID().toString();
+                pendingLocations.put(locationKey, city);
+                Map<String, Object> cityData = new HashMap<>();
+                cityData.put("locationKey", locationKey);
+                cityData.put("name", city.getName());
+                cityData.put("country", city.getSys().getCountry());
+                cityData.put("coord", city.getCoord());
+                cities.add(cityData);
+            }
+        }
+        return cities;
     }
 }
