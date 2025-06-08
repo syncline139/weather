@@ -52,6 +52,4 @@ public class LocationResponseDto {
     public static class Sys {
         private String country;
     }
-
-
 }
