@@ -1,11 +1,6 @@
 package com.example.services;
 
-import com.example.dao.LocationDao;
-import com.example.dto.response.LocationResponseDto;
-import com.example.dto.response.WeatherCardDto;
 import com.example.dto.response.WeatherResponseDto;
-import com.example.models.Locations;
-import com.example.utils.WeatherCondition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -19,8 +14,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

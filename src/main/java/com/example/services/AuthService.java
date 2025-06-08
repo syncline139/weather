@@ -37,11 +37,7 @@ public class AuthService {
             authDao.saveUser(user);
     }
 
-    public void createSession(Users user, HttpServletResponse response) {
-        if (user == null) {
-            throw new IllegalArgumentException("user не может быть null");
-        }
-
+    public void createSession(Users user, HttpServletResponse response, HttpServletRequest request) {
         Sessions sessions = new Sessions();
         sessions.setUser(user);
         sessions.setExpiresAt(LocalDateTime.now().plusDays(1));
@@ -53,6 +49,8 @@ public class AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(TIME_LIVE_SESSION);
         response.addCookie(cookie);
+        request.getSession().setAttribute("login", user.getLogin());
+        request.getSession().setAttribute("id", user.getId());
     }
 
     public void exit(HttpServletRequest request, HttpServletResponse response) {

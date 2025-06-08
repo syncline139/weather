@@ -6,7 +6,7 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-public class AppStartupListener implements ServletContextListener {
+public class OnStartupSessionCleaner implements ServletContextListener {
 
     private AuthDao authDao;
     private AuthService authService;

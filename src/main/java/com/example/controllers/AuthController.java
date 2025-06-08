@@ -60,23 +60,20 @@ public class AuthController {
                                  HttpServletRequest request,
                                  Model model) {
 
-        Users byLogin = authService.findByLogin(user.getLogin());
-        if (byLogin == null) {
+        Users specificUser = authService.findByLogin(user.getLogin());
+        if (specificUser == null) {
             bindingResult.rejectValue("login", LOGIN_ERROR, "Пользователь не найден");
             model.addAttribute("user", user);
             return "auth/sign-in";
         }
 
-        if (user.getPassword() != null && !PasswordUtil.checkPassword(user.getPassword(), byLogin.getPassword())) {
+        if (user.getPassword() != null && !PasswordUtil.checkPassword(user.getPassword(), specificUser.getPassword())) {
             bindingResult.rejectValue("password", WRONG_PASSWORD_ERROR, "Неверный пароль");
             model.addAttribute("user", user);
             return "auth/sign-in";
         }
 
-        authService.createSession(byLogin, response);
-        //Сохранение данных в сессию
-        request.getSession().setAttribute("login", user.getLogin());
-        request.getSession().setAttribute("id", byLogin.getId());
+        authService.createSession(specificUser, response,request);
         return "redirect:/weather";
     }
 
