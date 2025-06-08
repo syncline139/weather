@@ -11,8 +11,12 @@ import com.example.models.Users;
 import com.example.utils.WeatherCondition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
+import kotlin.SinceKotlin;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +28,12 @@ import java.net.http.HttpResponse;
 import java.util.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class LocationService {
 
     private final LocationDao locationDao;
     private final AuthDao authDao;
-
 
     @Value("${openweather.api.key}")
     private String API;
@@ -88,7 +92,7 @@ public class LocationService {
                 translatedWeather.getWeather().get(0).setMain(translatedMain);
                 weatherCards.add(new WeatherCardDto(location.getId(), location.getName(), translatedWeather));
             } catch (Exception e) {
-                System.err.println("Ошибка получения погоды для " + location.getName() + ": " + e.getMessage());
+                log.error("Ошибка получения погоды для {}: {}", location.getName(), e.getMessage());
             }
         }
         return weatherCards;

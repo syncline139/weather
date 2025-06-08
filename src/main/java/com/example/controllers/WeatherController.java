@@ -24,7 +24,6 @@ public class WeatherController {
 
     private final WeatherService weatherService;
     private final LocationService locationService;
-    private final LocationDao locationDao;
 
     @GetMapping
     public String mainScreenPage(Model model, HttpSession httpSession) {
@@ -76,7 +75,7 @@ public class WeatherController {
 
         WeatherResponseDto search = weatherService.searchCity(nameCity);
         if (search == null || search.getList() == null || search.getList().isEmpty()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Результаты поиска города пусты или не найдены.");
         }
 
         List<Map<String, Object>> cities = locationService.searchCities(session, userId, search);
@@ -122,8 +121,6 @@ public class WeatherController {
         redirectAttributes.addFlashAttribute("successfulMessage", "Локация успешно добавлена");
         return "redirect:/weather";
     }
-
-
 }
 
 
