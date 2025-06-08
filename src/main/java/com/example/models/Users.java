@@ -19,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Users {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

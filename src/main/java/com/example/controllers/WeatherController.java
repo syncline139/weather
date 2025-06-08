@@ -2,13 +2,10 @@ package com.example.controllers;
 
 import com.example.dao.LocationDao;
 import com.example.dto.response.WeatherCardDto;
-import com.example.dto.response.LocationResponseDto;
 import com.example.dto.response.WeatherResponseDto;
-import com.example.exceptions.GlobalExceptionHandler;
 import com.example.models.Locations;
 import com.example.services.LocationService;
 import com.example.services.WeatherService;
-import com.example.utils.WeatherCondition;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +26,6 @@ public class WeatherController {
     private final LocationService locationService;
     private final LocationDao locationDao;
 
-    /**
-     * Контроллер отвечает за вывод главной сраницы и полученным из сессии логином который был сохранен при аутентификации
-     *
-     * @return возвращаем основную страницу с карточками
-     */
-
     @GetMapping
     public String mainScreenPage(Model model, HttpSession httpSession) {
         String login = (String) httpSession.getAttribute("login");
@@ -46,31 +37,7 @@ public class WeatherController {
 
         model.addAttribute("login", login);
 
-        List<Locations> locations = locationDao.findLocationsByUserId(userId);
-        List<WeatherCardDto> weatherCards = new ArrayList<>();
-
-        for (Locations location : locations) {
-            double lat = location.getLatitude();
-            double lon = location.getLongitude();
-            try {
-                LocationResponseDto weather = locationService.searchWeather(lat, lon);
-
-                String translatedMain = weather.getWeather() != null && !weather.getWeather().isEmpty()
-                        ? WeatherCondition.translate(weather.getWeather().get(0).getMain())
-                        : "Неизвестно";
-                // Создаем новый объект с переведённым значением
-                LocationResponseDto translatedWeather = new LocationResponseDto(
-                        weather.getName(),
-                        weather.getWeather(),
-                        weather.getMain(),
-                        weather.getSys()
-                );
-                translatedWeather.getWeather().get(0).setMain(translatedMain);
-                weatherCards.add(new WeatherCardDto(location.getId(), location.getName(), translatedWeather));
-            } catch (Exception e) {
-                System.err.println("Ошибка получения погоды для " + location.getName() + ": " + e.getMessage());
-            }
-        }
+        List<WeatherCardDto> weatherCards = locationService.findLocationData(userId);
 
         model.addAttribute("weatherCards", weatherCards);
         return "pages/index";
